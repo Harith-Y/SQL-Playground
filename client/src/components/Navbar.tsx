@@ -7,7 +7,6 @@ import {
   IconButton,
   Box,
 } from '@mui/material';
-
 import {
   Storage as StorageIcon,
   School as SchoolIcon,
@@ -15,7 +14,11 @@ import {
   PlayArrow as RunIcon,
 } from '@mui/icons-material';
 
-const Navbar = () => {
+interface NavbarProps {
+  onExecuteQuery: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onExecuteQuery }) => {
   return (
     <AppBar position="static">
       <Toolbar>
@@ -28,7 +31,7 @@ const Navbar = () => {
           <Button
             color="inherit"
             startIcon={<RunIcon />}
-            onClick={() => {/* TODO: Implement query execution */}}
+            onClick={onExecuteQuery}
           >
             Run Query
           </Button>

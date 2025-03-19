@@ -9,15 +9,80 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  CircularProgress,
 } from '@mui/material';
+import { QueryResult } from '../services/api';
 
-const ResultsPanel = () => {
-  // Example data - this will be replaced with actual query results later on when in production.
-  const columns = ['id', 'username', 'email'];
-  const rows = [
-    { id: 1, username: 'harith_y', email: 'cs23i1027@iiitdm.ac.in' },
-    { id: 2, username: 'grishmank_parate', email: 'cs23i1026@iiitdm.ac.in' },
-  ];
+interface ResultsPanelProps {
+  result: QueryResult | null;
+  isLoading: boolean;
+}
+
+const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+
+    if (!result) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <Typography color="text.secondary">Execute a query to see results</Typography>
+        </Box>
+      );
+    }
+
+    if (!result.success) {
+      return (
+        <Box sx={{ p: 2 }}>
+          <Typography color="error">{result.error}</Typography>
+        </Box>
+      );
+    }
+
+    if (result.results) {
+      const columns = result.columns || (result.results[0] ? Object.keys(result.results[0]) : []);
+      
+      return (
+        <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
+          <Table stickyHeader size="small">
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell key={column}>{column}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {result.results.map((row, index) => (
+                <TableRow key={index}>
+                  {columns.map((column) => (
+                    <TableCell key={`${index}-${column}`}>
+                      {row[column]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      );
+    }
+
+    // Show changes for non-SELECT queries
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography>
+          Query executed successfully. {result.changes} row(s) affected.
+          {result.lastId && ` Last inserted ID: ${result.lastId}`}
+        </Typography>
+      </Box>
+    );
+  };
 
   return (
     <Paper sx={{ 
@@ -26,31 +91,10 @@ const ResultsPanel = () => {
       flexDirection: 'column',
       overflow: 'hidden'
     }}>
-      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="subtitle1">Query Results</Typography>
       </Box>
-      <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
-        <Table stickyHeader size="small">
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell key={column}>{column}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.id}>
-                {columns.map((column) => (
-                  <TableCell key={`${row.id}-${column}`}>
-                    {row[column as keyof typeof row]}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {renderContent()}
     </Paper>
   );
 };

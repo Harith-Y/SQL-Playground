@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import { Box } from '@mui/material';
+import { Box, Snackbar, Alert } from '@mui/material';
 import Navbar from './components/Navbar';
 import SQLEditor from './components/SQLEditor';
 import ResultsPanel from './components/ResultsPanel';
 import SchemaViewer from './components/SchemaViewer';
+import { executeQuery, QueryResult } from './services/api';
 
 const theme = createTheme({
   palette: {
@@ -23,11 +24,47 @@ const theme = createTheme({
 });
 
 function App() {
+  const [currentQuery, setCurrentQuery] = useState<string>('');
+  const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleQueryChange = (value: string | undefined) => {
+    setCurrentQuery(value || '');
+  };
+
+  const handleQueryExecute = async () => {
+    if (!currentQuery.trim()) {
+      setError('Please enter a query to execute');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await executeQuery(currentQuery);
+      if (result.success) {
+        setQueryResult(result);
+      } else {
+        setError(result.error || 'Failed to execute query');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseError = () => {
+    setError(null);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Navbar />
+        <Navbar onExecuteQuery={handleQueryExecute} />
         <Box sx={{ 
           display: 'flex', 
           flexGrow: 1,
@@ -41,11 +78,28 @@ function App() {
             flexDirection: 'column',
             gap: 2
           }}>
-            <SQLEditor />
-            <ResultsPanel />
+            <SQLEditor 
+              value={currentQuery}
+              onChange={handleQueryChange}
+              isLoading={isLoading}
+            />
+            <ResultsPanel 
+              result={queryResult}
+              isLoading={isLoading}
+            />
           </Box>
           <SchemaViewer />
         </Box>
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
+          onClose={handleCloseError}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert onClose={handleCloseError} severity="error">
+            {error}
+          </Alert>
+        </Snackbar>
       </Box>
     </ThemeProvider>
   );

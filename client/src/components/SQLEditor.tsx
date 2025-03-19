@@ -1,8 +1,14 @@
 import React from 'react';
-import { Paper, Box, Typography } from '@mui/material';
+import { Paper, Box, Typography, CircularProgress } from '@mui/material';
 import Editor from '@monaco-editor/react';
 
-const SQLEditor = () => {
+interface SQLEditorProps {
+  value: string;
+  onChange: (value: string | undefined) => void;
+  isLoading: boolean;
+}
+
+const SQLEditor: React.FC<SQLEditorProps> = ({ value, onChange, isLoading }) => {
   const defaultQuery = `-- Write your SQL query here
 SELECT * FROM users;`;
 
@@ -12,17 +18,20 @@ SELECT * FROM users;`;
       minHeight: '300px',
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      position: 'relative'
     }}>
-      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="subtitle1">SQL Editor</Typography>
+        {isLoading && <CircularProgress size={20} />}
       </Box>
       <Box sx={{ flexGrow: 1 }}>
         <Editor
           height="100%"
           defaultLanguage="sql"
-          defaultValue={defaultQuery}
+          value={value || defaultQuery}
           theme="vs-dark"
+          onChange={onChange}
           options={{
             minimap: { enabled: false },
             fontSize: 14,
