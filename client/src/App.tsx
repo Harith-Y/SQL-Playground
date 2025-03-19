@@ -1,25 +1,47 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { Box } from '@mui/material';
+import Navbar from './components/Navbar';
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#90caf9',
+    },
+    secondary: {
+      main: '#f48fb1',
+    },
+    background: {
+      default: '#1a1a1a',
+      paper: '#2d2d2d',
+    },
+  },
+});
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        <Navbar />
+        <Box sx={{ 
+          display: 'flex', 
+          flexGrow: 1,
+          gap: 2,
+          p: 2,
+          overflow: 'hidden'
+        }}>
+          <Box sx={{ 
+            width: '50%', 
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2
+          }}>
+          </Box>
+        </Box>
+      </Box>
+    </ThemeProvider>
   );
 }
 
