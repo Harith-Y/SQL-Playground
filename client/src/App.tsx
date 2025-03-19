@@ -2,6 +2,9 @@ import React from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Box } from '@mui/material';
 import Navbar from './components/Navbar';
+import SQLEditor from './components/SQLEditor';
+import ResultsPanel from './components/ResultsPanel';
+import SchemaViewer from './components/SchemaViewer';
 
 const theme = createTheme({
   palette: {
@@ -38,7 +41,10 @@ function App() {
             flexDirection: 'column',
             gap: 2
           }}>
+            <SQLEditor />
+            <ResultsPanel />
           </Box>
+          <SchemaViewer />
         </Box>
       </Box>
     </ThemeProvider>
