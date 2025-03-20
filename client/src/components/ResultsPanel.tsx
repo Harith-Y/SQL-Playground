@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Paper,
   Box,
   Typography,
   Table,
@@ -9,7 +8,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  CircularProgress,
+  Paper,
   Button,
 } from '@mui/material';
 import { QueryResult } from '../services/api';
@@ -20,108 +19,83 @@ interface ResultsPanelProps {
 }
 
 const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          <CircularProgress />
-        </Box>
-      );
-    }
-
-    if (!result) {
-      return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          <Typography color="text.secondary">Execute a query to see results</Typography>
-        </Box>
-      );
-    }
-
-    if (!result.success) {
-      return (
-        <Box sx={{ p: 2 }}>
-          <Typography color="error">{result.error}</Typography>
-        </Box>
-      );
-    }
-
-    // For SELECT queries that return results
-    if (result.results && Array.isArray(result.results)) {
-      if (result.results.length === 0) {
-        return (
-          <Box sx={{ p: 2 }}>
-            <Typography>No results found</Typography>
-          </Box>
-        );
-      }
-
-      const columns = result.columns || Object.keys(result.results[0]);
-      
-      return (
-        <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
-          <Table stickyHeader size="small">
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell key={column}>{column}</TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {result.results.map((row, index) => (
-                <TableRow key={index}>
-                  {columns.map((column) => (
-                    <TableCell key={`${index}-${column}`}>
-                      {row[column] !== null ? row[column].toString() : 'NULL'}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      );
-    }
-
-    // For INSERT, UPDATE queries that return changes
+  if (isLoading) {
     return (
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Typography>
-          Query executed successfully. {result.changes} row(s) affected.
-          {result.lastId !== undefined && ` Last inserted ID: ${result.lastId}`}
-        </Typography>
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={() => {
-            // Auto-generate a SELECT query to show the updated data
-            const editor = document.querySelector('.monaco-editor');
-            if (editor) {
-              const event = new CustomEvent('execute-query', {
-                detail: { query: 'SELECT * FROM users ORDER BY id DESC LIMIT 5;' }
-              });
-              editor.dispatchEvent(event);
-            }
-          }}
-        >
-          View Updated Data
-        </Button>
+      <Box sx={{ p: 2 }}>
+        <Typography>Executing query...</Typography>
       </Box>
     );
-  };
+  }
 
-  return (
-    <Paper sx={{ 
-      height: '300px',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
-    }}>
-      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="subtitle1">Query Results</Typography>
+  if (!result) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography>No results to display</Typography>
       </Box>
-      {renderContent()}
-    </Paper>
+    );
+  }
+
+  if (!result.success) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography color="error">{result.error}</Typography>
+      </Box>
+    );
+  }
+
+  // For SELECT queries that return results
+  if (result.results && Array.isArray(result.results)) {
+    if (result.results.length === 0) {
+      return (
+        <Box sx={{ p: 2 }}>
+          <Typography>No results found</Typography>
+        </Box>
+      );
+    }
+
+    const columns = result.columns || Object.keys(result.results[0]);
+
+    return (
+      <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              {columns.map((column: string) => (
+                <TableCell key={column}>{column}</TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {result.results.map((row: Record<string, any>, index: number) => (
+              <TableRow key={index}>
+                {columns.map((column: string) => (
+                  <TableCell key={`${index}-${column}`}>
+                    {row[column] !== null ? row[column].toString() : 'NULL'}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  }
+
+  // For INSERT, UPDATE, DELETE queries
+  return (
+    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Typography>
+        Query executed successfully. {result.changes} row(s) affected.
+        {result.lastId !== undefined && ` Last inserted ID: ${result.lastId}`}
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => window.location.reload()}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Refresh Results
+      </Button>
+    </Box>
   );
 };
 

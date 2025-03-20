@@ -29,8 +29,9 @@ if (!fs.existsSync(path.join(__dirname, 'routes'))) {
     fs.mkdirSync(path.join(__dirname, 'routes'));
 }
 
-// API Routes - only include queries route for now
+// API Routes
 app.use('/api/queries', require('./routes/queries'));
+app.use('/api/schema', require('./routes/schema'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Box, Snackbar, Alert } from '@mui/material';
 import Navbar from './components/Navbar';
 import SQLEditor from './components/SQLEditor';
 import ResultsPanel from './components/ResultsPanel';
 import SchemaViewer from './components/SchemaViewer';
-import { executeQuery, QueryResult } from './services/api';
+import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 
 const theme = createTheme({
   palette: {
@@ -23,11 +23,49 @@ const theme = createTheme({
   },
 });
 
+// Default schema
+const defaultSchema: SchemaDefinition = {
+  tables: {
+    users: {
+      columns: [
+        { name: 'id', type: 'INTEGER', constraints: 'PRIMARY KEY AUTOINCREMENT' },
+        { name: 'username', type: 'TEXT', constraints: 'UNIQUE NOT NULL' },
+        { name: 'email', type: 'TEXT', constraints: 'UNIQUE NOT NULL' },
+        { name: 'password', type: 'TEXT', constraints: 'NOT NULL' },
+      ],
+    },
+    saved_queries: {
+      columns: [
+        { name: 'id', type: 'INTEGER', constraints: 'PRIMARY KEY AUTOINCREMENT' },
+        { name: 'user_id', type: 'INTEGER', constraints: 'FOREIGN KEY' },
+        { name: 'title', type: 'TEXT', constraints: 'NOT NULL' },
+        { name: 'query', type: 'TEXT', constraints: 'NOT NULL' },
+      ],
+    },
+  },
+};
+
 function App() {
   const [currentQuery, setCurrentQuery] = useState<string>('');
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [schema, setSchema] = useState<SchemaDefinition>(defaultSchema);
+  const [savedQueries, setSavedQueries] = useState<Array<{ title: string; query: string }>>([]);
+
+  // Fetch initial schema
+  useEffect(() => {
+    const loadSchema = async () => {
+      try {
+        const fetchedSchema = await fetchSchema();
+        setSchema(fetchedSchema);
+      } catch (err) {
+        console.error('Error loading schema:', err);
+        // Keep the default schema if fetching fails
+      }
+    };
+    loadSchema();
+  }, []);
 
   const handleQueryChange = (value: string | undefined) => {
     setCurrentQuery(value || '');
@@ -47,6 +85,9 @@ function App() {
       const result = await executeQuery(queryToExecute);
       if (result.success) {
         setQueryResult(result);
+        // Refresh schema after successful query execution
+        const updatedSchema = await fetchSchema();
+        setSchema(updatedSchema);
       } else {
         setError(result.error || 'Failed to execute query');
       }
@@ -59,6 +100,14 @@ function App() {
 
   const handleCloseError = () => {
     setError(null);
+  };
+
+  const handleSchemaLoad = (newSchema: SchemaDefinition) => {
+    setSchema(newSchema);
+  };
+
+  const handleQueriesLoad = (queries: Array<{ title: string; query: string }>) => {
+    setSavedQueries(queries);
   };
 
   return (
@@ -90,7 +139,12 @@ function App() {
               isLoading={isLoading}
             />
           </Box>
-          <SchemaViewer />
+          <SchemaViewer 
+            schema={schema}
+            queries={savedQueries}
+            onSchemaLoad={handleSchemaLoad}
+            onQueriesLoad={handleQueriesLoad}
+          />
         </Box>
         <Snackbar
           open={!!error}

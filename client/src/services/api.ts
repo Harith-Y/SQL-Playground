@@ -1,4 +1,6 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import axios from 'axios';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
 export interface QueryResult {
   success: boolean;
@@ -9,27 +11,36 @@ export interface QueryResult {
   error?: string;
 }
 
+export interface SchemaDefinition {
+  tables: {
+    [key: string]: {
+      columns: Array<{
+        name: string;
+        type: string;
+        constraints: string;
+      }>;
+    };
+  };
+}
+
 export const executeQuery = async (query: string): Promise<QueryResult> => {
   try {
-    const response = await fetch(`${API_URL}/queries/execute`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to execute query');
-    }
-
-    return data;
+    const response = await axios.post(`${API_BASE_URL}/api/queries/execute`, { query });
+    return response.data;
   } catch (error) {
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'An unknown error occurred' };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An error occurred',
+    };
+  }
+};
+
+export const fetchSchema = async (): Promise<SchemaDefinition> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/schema`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching schema:', error);
+    throw error;
   }
 };
