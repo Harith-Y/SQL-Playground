@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import {
   Box,
   Typography,
@@ -19,36 +19,6 @@ interface ResultsPanelProps {
 }
 
 const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Debounce resize observer updates
-    let timeoutId: NodeJS.Timeout;
-    const observer = new ResizeObserver(() => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(() => {
-        // Force a re-render after resize
-        if (containerRef.current) {
-          containerRef.current.style.height = 'auto';
-          containerRef.current.style.height = `${containerRef.current.scrollHeight}px`;
-        }
-      }, 100);
-    });
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      observer.disconnect();
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, []);
-
   if (isLoading) {
     return (
       <Box sx={{ p: 2 }}>
@@ -86,8 +56,23 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
     const columns = result.columns || Object.keys(result.results[0]);
 
     return (
-      <Box ref={containerRef} sx={{ height: '100%', overflow: 'hidden' }}>
-        <TableContainer sx={{ height: '100%', overflow: 'auto' }}>
+      <Box sx={{ height: '100%', overflow: 'hidden' }}>
+        <TableContainer 
+          sx={{ 
+            height: '100%',
+            overflow: 'auto',
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#1a1a1a',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#666',
+              borderRadius: '4px',
+            },
+          }}
+        >
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
