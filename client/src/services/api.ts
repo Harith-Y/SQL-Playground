@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
 export interface QueryResult {
   success: boolean;
@@ -28,6 +28,7 @@ export const executeQuery = async (query: string): Promise<QueryResult> => {
     const response = await axios.post(`${API_BASE_URL}/api/queries/execute`, { query });
     return response.data;
   } catch (error) {
+    console.error('Query execution error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred',
