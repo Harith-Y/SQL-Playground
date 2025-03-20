@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -19,6 +19,36 @@ interface ResultsPanelProps {
 }
 
 const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Debounce resize observer updates
+    let timeoutId: NodeJS.Timeout;
+    const observer = new ResizeObserver(() => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      timeoutId = setTimeout(() => {
+        // Force a re-render after resize
+        if (containerRef.current) {
+          containerRef.current.style.height = 'auto';
+          containerRef.current.style.height = `${containerRef.current.scrollHeight}px`;
+        }
+      }, 100);
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
   if (isLoading) {
     return (
       <Box sx={{ p: 2 }}>
@@ -56,28 +86,30 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
     const columns = result.columns || Object.keys(result.results[0]);
 
     return (
-      <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              {columns.map((column: string) => (
-                <TableCell key={column}>{column}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {result.results.map((row: Record<string, any>, index: number) => (
-              <TableRow key={index}>
+      <Box ref={containerRef} sx={{ height: '100%', overflow: 'hidden' }}>
+        <TableContainer sx={{ height: '100%', overflow: 'auto' }}>
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow>
                 {columns.map((column: string) => (
-                  <TableCell key={`${index}-${column}`}>
-                    {row[column] !== null ? row[column].toString() : 'NULL'}
-                  </TableCell>
+                  <TableCell key={column}>{column}</TableCell>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {result.results.map((row: Record<string, any>, index: number) => (
+                <TableRow key={index}>
+                  {columns.map((column: string) => (
+                    <TableCell key={`${index}-${column}`}>
+                      {row[column] !== null ? row[column].toString() : 'NULL'}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
     );
   }
 
