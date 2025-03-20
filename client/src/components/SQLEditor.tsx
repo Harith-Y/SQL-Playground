@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Paper, Box, Typography, CircularProgress } from '@mui/material';
 import Editor from '@monaco-editor/react';
 
@@ -6,11 +6,40 @@ interface SQLEditorProps {
   value: string;
   onChange: (value: string | undefined) => void;
   isLoading: boolean;
+  onExecuteQuery: (query: string) => void;
 }
 
-const SQLEditor: React.FC<SQLEditorProps> = ({ value, onChange, isLoading }) => {
+const SQLEditor: React.FC<SQLEditorProps> = ({ value, onChange, isLoading, onExecuteQuery }) => {
   const defaultQuery = `-- Write your SQL query here
 SELECT * FROM users;`;
+
+  const editorRef = useRef<any>(null);
+
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+  };
+
+  useEffect(() => {
+    // Listen for custom execute-query events
+    const handleExecuteQuery = (event: any) => {
+      const { query } = event.detail;
+      if (query && editorRef.current) {
+        editorRef.current.setValue(query);
+        onExecuteQuery(query);
+      }
+    };
+
+    const editorElement = document.querySelector('.monaco-editor');
+    if (editorElement) {
+      editorElement.addEventListener('execute-query', handleExecuteQuery);
+    }
+
+    return () => {
+      if (editorElement) {
+        editorElement.removeEventListener('execute-query', handleExecuteQuery);
+      }
+    };
+  }, [onExecuteQuery]);
 
   return (
     <Paper sx={{ 
@@ -32,6 +61,7 @@ SELECT * FROM users;`;
           value={value || defaultQuery}
           theme="vs-dark"
           onChange={onChange}
+          onMount={handleEditorDidMount}
           options={{
             minimap: { enabled: false },
             fontSize: 14,

@@ -33,8 +33,9 @@ function App() {
     setCurrentQuery(value || '');
   };
 
-  const handleQueryExecute = async () => {
-    if (!currentQuery.trim()) {
+  const handleQueryExecute = async (query?: string) => {
+    const queryToExecute = query || currentQuery;
+    if (!queryToExecute.trim()) {
       setError('Please enter a query to execute');
       return;
     }
@@ -43,7 +44,7 @@ function App() {
     setError(null);
 
     try {
-      const result = await executeQuery(currentQuery);
+      const result = await executeQuery(queryToExecute);
       if (result.success) {
         setQueryResult(result);
       } else {
@@ -64,7 +65,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Navbar onExecuteQuery={handleQueryExecute} />
+        <Navbar onExecuteQuery={() => handleQueryExecute()} />
         <Box sx={{ 
           display: 'flex', 
           flexGrow: 1,
@@ -82,6 +83,7 @@ function App() {
               value={currentQuery}
               onChange={handleQueryChange}
               isLoading={isLoading}
+              onExecuteQuery={handleQueryExecute}
             />
             <ResultsPanel 
               result={queryResult}

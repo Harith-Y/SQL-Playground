@@ -10,6 +10,7 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
+  Button,
 } from '@mui/material';
 import { QueryResult } from '../services/api';
 
@@ -44,8 +45,17 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
       );
     }
 
-    if (result.results) {
-      const columns = result.columns || (result.results[0] ? Object.keys(result.results[0]) : []);
+    // For SELECT queries that return results
+    if (result.results && Array.isArray(result.results)) {
+      if (result.results.length === 0) {
+        return (
+          <Box sx={{ p: 2 }}>
+            <Typography>No results found</Typography>
+          </Box>
+        );
+      }
+
+      const columns = result.columns || Object.keys(result.results[0]);
       
       return (
         <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
@@ -62,7 +72,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
                 <TableRow key={index}>
                   {columns.map((column) => (
                     <TableCell key={`${index}-${column}`}>
-                      {row[column]}
+                      {row[column] !== null ? row[column].toString() : 'NULL'}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -73,13 +83,29 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
       );
     }
 
-    // Show changes for non-SELECT queries
+    // For INSERT, UPDATE queries that return changes
     return (
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Typography>
           Query executed successfully. {result.changes} row(s) affected.
-          {result.lastId && ` Last inserted ID: ${result.lastId}`}
+          {result.lastId !== undefined && ` Last inserted ID: ${result.lastId}`}
         </Typography>
+        <Button 
+          variant="contained" 
+          color="primary"
+          onClick={() => {
+            // Auto-generate a SELECT query to show the updated data
+            const editor = document.querySelector('.monaco-editor');
+            if (editor) {
+              const event = new CustomEvent('execute-query', {
+                detail: { query: 'SELECT * FROM users ORDER BY id DESC LIMIT 5;' }
+              });
+              editor.dispatchEvent(event);
+            }
+          }}
+        >
+          View Updated Data
+        </Button>
       </Box>
     );
   };
