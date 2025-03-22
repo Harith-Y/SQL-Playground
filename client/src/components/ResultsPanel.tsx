@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -19,6 +19,13 @@ interface ResultsPanelProps {
 }
 
 const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('ResultsPanel received result:', result);
+  }, [result]);
+
   if (isLoading) {
     return (
       <Box sx={{ p: 2 }}>
@@ -56,10 +63,19 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
     const columns = result.columns || Object.keys(result.results[0]);
 
     return (
-      <Box sx={{ height: '100%', overflow: 'hidden' }}>
+      <Box 
+        ref={containerRef} 
+        sx={{ 
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}
+      >
         <TableContainer 
+          component={Paper}
           sx={{ 
-            height: '100%',
+            flex: 1,
             overflow: 'auto',
             '&::-webkit-scrollbar': {
               width: '8px',
