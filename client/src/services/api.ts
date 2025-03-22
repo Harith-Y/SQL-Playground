@@ -25,8 +25,27 @@ export interface SchemaDefinition {
 
 export const executeQuery = async (query: string): Promise<QueryResult> => {
   try {
+    console.log('Executing query:', query);
     const response = await axios.post(`${API_BASE_URL}/api/queries/execute`, { query });
-    return response.data;
+    console.log('Server response:', response.data);
+    
+    // Ensure the response has the correct structure
+    const result: QueryResult = {
+      success: true,
+      ...response.data
+    };
+
+    // If it's a SELECT query, ensure we have results and columns
+    if (query.trim().toUpperCase().startsWith('SELECT')) {
+      if (!result.results) {
+        result.results = [];
+      }
+      if (!result.columns && result.results.length > 0) {
+        result.columns = Object.keys(result.results[0]);
+      }
+    }
+
+    return result;
   } catch (error) {
     console.error('Query execution error:', error);
     return {

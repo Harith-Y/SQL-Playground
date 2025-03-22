@@ -27,33 +27,66 @@ router.post('/execute', async (req, res) => {
   }
 
   try {
+    // Clean the query by removing comments and extra whitespace
+    const cleanQuery = query
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => !line.startsWith('--') && line.length > 0)
+      .join(' ')
+      .trim();
+
     // For SELECT queries, use all() to get results
-    if (query.trim().toUpperCase().startsWith('SELECT')) {
-      db.all(query, [], (err, rows) => {
-        if (err) {
-          return res.status(400).json({ error: err.message });
-        }
-        res.json({ 
-          success: true,
-          results: rows,
-          columns: rows.length > 0 ? Object.keys(rows[0]) : []
+    if (cleanQuery.toUpperCase().startsWith('SELECT')) {
+      // First, get the list of tables to check case sensitivity
+      const tables = await new Promise((resolve, reject) => {
+        db.all("SELECT name FROM sqlite_master WHERE type='table'", [], (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows.map(row => row.name));
         });
+      });
+
+      // Modify the query to use the correct case for table names
+      let modifiedQuery = cleanQuery;
+      tables.forEach(table => {
+        const regex = new RegExp(`\\b${table}\\b`, 'gi');
+        modifiedQuery = modifiedQuery.replace(regex, table);
+      });
+
+      const rows = await new Promise((resolve, reject) => {
+        db.all(modifiedQuery, [], (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        });
+      });
+
+      res.json({ 
+        success: true,
+        results: rows,
+        columns: rows.length > 0 ? Object.keys(rows[0]) : []
       });
     } else {
       // For other queries (INSERT, UPDATE), use run()
-      db.run(query, [], function(err) {
-        if (err) {
-          return res.status(400).json({ error: err.message });
-        }
-        res.json({ 
-          success: true,
-          changes: this.changes,
-          lastId: this.lastID
+      const result = await new Promise((resolve, reject) => {
+        db.run(cleanQuery, [], function(err) {
+          if (err) reject(err);
+          else resolve({
+            changes: this.changes,
+            lastId: this.lastID
+          });
         });
+      });
+
+      res.json({ 
+        success: true,
+        ...result
       });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Query execution error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
   }
 });
 
