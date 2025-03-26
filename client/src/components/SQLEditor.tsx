@@ -1,15 +1,23 @@
 import React, { useEffect, useRef } from 'react';
-import { Paper, Box, Typography, CircularProgress } from '@mui/material';
+import { Paper, Box, Typography, CircularProgress, Button } from '@mui/material';
 import Editor from '@monaco-editor/react';
+import { PlayArrow } from '@mui/icons-material';
 
 interface SQLEditorProps {
   value: string;
   onChange: (value: string | undefined) => void;
   isLoading: boolean;
   onExecuteQuery: (query: string) => void;
+  readOnly?: boolean;
 }
 
-const SQLEditor: React.FC<SQLEditorProps> = ({ value, onChange, isLoading, onExecuteQuery }) => {
+const SQLEditor: React.FC<SQLEditorProps> = ({
+  value,
+  onChange,
+  isLoading,
+  onExecuteQuery,
+  readOnly = false,
+}) => {
   const defaultQuery = `-- Write your SQL query here
 SELECT * FROM users;`;
 
@@ -42,25 +50,26 @@ SELECT * FROM users;`;
   }, [onExecuteQuery]);
 
   return (
-    <Paper sx={{ 
-      flexGrow: 1, 
-      minHeight: '300px',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      position: 'relative'
-    }}>
-      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="subtitle1">SQL Editor</Typography>
-        {isLoading && <CircularProgress size={20} />}
+    <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="subtitle2">SQL Editor</Typography>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={isLoading ? <CircularProgress size={20} /> : <PlayArrow />}
+          onClick={() => onExecuteQuery(value)}
+          disabled={isLoading || readOnly}
+        >
+          Run Query
+        </Button>
       </Box>
-      <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1, position: 'relative' }}>
         <Editor
           height="100%"
           defaultLanguage="sql"
           value={value || defaultQuery}
-          theme="vs-dark"
           onChange={onChange}
+          theme="vs-dark"
           onMount={handleEditorDidMount}
           options={{
             minimap: { enabled: false },
@@ -68,6 +77,7 @@ SELECT * FROM users;`;
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             automaticLayout: true,
+            readOnly,
           }}
         />
       </Box>

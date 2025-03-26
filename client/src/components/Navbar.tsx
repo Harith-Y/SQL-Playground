@@ -13,12 +13,15 @@ import {
   Save as SaveIcon,
   PlayArrow as RunIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   onExecuteQuery: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onExecuteQuery }) => {
+  const navigate = useNavigate();
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -47,7 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({ onExecuteQuery }) => {
           <Button
             color="inherit"
             startIcon={<SchoolIcon />}
-            onClick={() => {/* TODO: Implement tutorials */}}
+            onClick={() => navigate('/tutorials')}
           >
             Tutorials
           </Button>

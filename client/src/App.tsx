@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Box, Snackbar, Alert } from '@mui/material';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SQLEditor from './components/SQLEditor';
 import ResultsPanel from './components/ResultsPanel';
 import SchemaViewer from './components/SchemaViewer';
+import Tutorials from './components/Tutorials';
+import TutorialLesson from './components/TutorialLesson';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 
 const theme = createTheme({
@@ -45,13 +48,14 @@ const defaultSchema: SchemaDefinition = {
   },
 };
 
-function App() {
+const Playground: React.FC = () => {
   const [currentQuery, setCurrentQuery] = useState<string>('');
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [schema, setSchema] = useState<SchemaDefinition>(defaultSchema);
   const [savedQueries, setSavedQueries] = useState<Array<{ title: string; query: string }>>([]);
+  const navigate = useNavigate();
 
   // Fetch initial schema
   useEffect(() => {
@@ -111,52 +115,64 @@ function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Navbar onExecuteQuery={() => handleQueryExecute()} />
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Navbar onExecuteQuery={() => handleQueryExecute()} />
+      <Box sx={{ 
+        display: 'flex', 
+        flexGrow: 1,
+        gap: 2,
+        p: 2,
+        overflow: 'hidden'
+      }}>
         <Box sx={{ 
-          display: 'flex', 
-          flexGrow: 1,
-          gap: 2,
-          p: 2,
-          overflow: 'hidden'
+          width: '50%', 
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2
         }}>
-          <Box sx={{ 
-            width: '50%', 
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2
-          }}>
-            <SQLEditor 
-              value={currentQuery}
-              onChange={handleQueryChange}
-              isLoading={isLoading}
-              onExecuteQuery={handleQueryExecute}
-            />
-            <ResultsPanel 
-              result={queryResult}
-              isLoading={isLoading}
-            />
-          </Box>
-          <SchemaViewer 
-            schema={schema}
-            queries={savedQueries}
-            onSchemaLoad={handleSchemaLoad}
-            onQueriesLoad={handleQueriesLoad}
+          <SQLEditor 
+            value={currentQuery}
+            onChange={handleQueryChange}
+            isLoading={isLoading}
+            onExecuteQuery={handleQueryExecute}
+          />
+          <ResultsPanel 
+            result={queryResult}
+            isLoading={isLoading}
           />
         </Box>
-        <Snackbar
-          open={!!error}
-          autoHideDuration={6000}
-          onClose={handleCloseError}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        >
-          <Alert onClose={handleCloseError} severity="error">
-            {error}
-          </Alert>
-        </Snackbar>
+        <SchemaViewer 
+          schema={schema}
+          queries={savedQueries}
+          onSchemaLoad={handleSchemaLoad}
+          onQueriesLoad={handleQueriesLoad}
+        />
       </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={handleCloseError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseError} severity="error">
+          {error}
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
+};
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Playground />} />
+          <Route path="/tutorials" element={<Tutorials />} />
+          <Route path="/tutorials/:tutorialId" element={<TutorialLesson />} />
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }
