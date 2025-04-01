@@ -2,13 +2,18 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Box, Snackbar, Alert } from '@mui/material';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import SQLEditor from './components/SQLEditor';
 import ResultsPanel from './components/ResultsPanel';
 import SchemaViewer from './components/SchemaViewer';
 import Tutorials from './components/Tutorials';
 import TutorialLesson from './components/TutorialLesson';
+import Login from './components/Login';
+import Register from './components/Register';
+import ProtectedRoute from './components/ProtectedRoute';
+import SQLPlayground from './components/SQLPlayground';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 
 const theme = createTheme({
@@ -176,18 +181,38 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <Navbar />
-          <Box sx={{ flexGrow: 1 }}>
-            <Routes>
-              <Route path="/" element={<Playground />} />
-              <Route path="/tutorials" element={<Tutorials />} />
-              <Route path="/tutorials/:tutorialId" element={<TutorialLesson />} />
-            </Routes>
+      <AuthProvider>
+        <BrowserRouter>
+          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <Navbar />
+            <Box sx={{ flexGrow: 1 }}>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <SQLPlayground />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/playground"
+                  element={
+                    <ProtectedRoute>
+                      <Playground />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/tutorials" element={<Tutorials />} />
+                <Route path="/tutorials/:tutorialId" element={<TutorialLesson />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Box>
           </Box>
-        </Box>
-      </BrowserRouter>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
