@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Register = () => {
     const [username, setUsername] = useState('');
@@ -111,6 +111,13 @@ const Register = () => {
                         >
                             {loading ? 'Creating account...' : 'Create account'}
                         </button>
+                    </div>
+
+                    <div className="text-sm text-center">
+                        <span className="text-gray-600">Already have an account? </span>
+                        <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+                            Sign in here
+                        </Link>
                     </div>
                 </form>
             </div>
