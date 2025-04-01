@@ -9,17 +9,14 @@ import {
 import {
   Storage as StorageIcon,
   School as SchoolIcon,
-  Save as SaveIcon,
-  PlayArrow as RunIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-interface NavbarProps {
-  onExecuteQuery: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ onExecuteQuery }) => {
+const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
 
   return (
     <AppBar position="static">
@@ -30,21 +27,15 @@ const Navbar: React.FC<NavbarProps> = ({ onExecuteQuery }) => {
         </Typography>
         
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            color="inherit"
-            startIcon={<RunIcon />}
-            onClick={onExecuteQuery}
-          >
-            Run Query
-          </Button>
-          
-          <Button
-            color="inherit"
-            startIcon={<SaveIcon />}
-            onClick={() => {/* TODO: Implement save functionality */}}
-          >
-            Save
-          </Button>
+          {!isHome && (
+            <Button
+              color="inherit"
+              startIcon={<HomeIcon />}
+              onClick={() => navigate('/')}
+            >
+              Home
+            </Button>
+          )}
           
           <Button
             color="inherit"
