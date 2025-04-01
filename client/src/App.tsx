@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Box, Snackbar, Alert } from '@mui/material';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SQLEditor from './components/SQLEditor';
 import ResultsPanel from './components/ResultsPanel';
@@ -48,14 +49,13 @@ const defaultSchema: SchemaDefinition = {
   },
 };
 
-const Playground: React.FC = () => {
+const Playground = () => {
   const [currentQuery, setCurrentQuery] = useState<string>('');
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [schema, setSchema] = useState<SchemaDefinition>(defaultSchema);
   const [savedQueries, setSavedQueries] = useState<Array<{ title: string; query: string }>>([]);
-  const navigate = useNavigate();
 
   // Fetch initial schema
   useEffect(() => {
@@ -130,16 +130,27 @@ const Playground: React.FC = () => {
           flexDirection: 'column',
           gap: 2
         }}>
-          <SQLEditor 
-            value={currentQuery}
-            onChange={handleQueryChange}
-            isLoading={isLoading}
-            onExecuteQuery={handleQueryExecute}
-          />
-          <ResultsPanel 
-            result={queryResult}
-            isLoading={isLoading}
-          />
+          <Box sx={{ 
+            flex: '1 1 70%', // SQL Editor takes more space
+            minHeight: 0 // Important for nested flex containers
+          }}>
+            <SQLEditor 
+              value={currentQuery}
+              onChange={handleQueryChange}
+              isLoading={isLoading}
+              onExecuteQuery={handleQueryExecute}
+            />
+          </Box>
+          <Box sx={{ 
+            flex: '1 1 30%', // Results panel takes less space
+            minHeight: 0, // Important for nested flex containers
+            maxHeight: '30vh' // Limit maximum height
+          }}>
+            <ResultsPanel 
+              result={queryResult}
+              isLoading={isLoading}
+            />
+          </Box>
         </Box>
         <SchemaViewer 
           schema={schema}

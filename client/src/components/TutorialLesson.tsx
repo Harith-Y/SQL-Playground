@@ -41,9 +41,61 @@ const lessons: Record<string, Lesson[]> = {
       exerciseQuery: 'SELECT username FROM users WHERE id > 1;',
       expectedResult: 'SELECT username FROM users WHERE id > 1;',
     },
-    // Add more lessons as needed
   ],
-  // Add more tutorial sections as needed
+  'joins': [
+    {
+      id: 'inner-join',
+      title: 'INNER JOIN',
+      content: 'INNER JOIN returns records that have matching values in both tables.',
+      exampleQuery: 'SELECT users.username, saved_queries.title FROM users INNER JOIN saved_queries ON users.id = saved_queries.user_id;',
+      exerciseQuery: 'SELECT users.username, saved_queries.title FROM users INNER JOIN saved_queries ON users.id = saved_queries.user_id;',
+      expectedResult: 'SELECT users.username, saved_queries.title FROM users INNER JOIN saved_queries ON users.id = saved_queries.user_id;',
+    },
+    {
+      id: 'left-join',
+      title: 'LEFT JOIN',
+      content: 'LEFT JOIN returns all records from the left table and the matched records from the right table.',
+      exampleQuery: 'SELECT users.username, saved_queries.title FROM users LEFT JOIN saved_queries ON users.id = saved_queries.user_id;',
+      exerciseQuery: 'SELECT users.username, saved_queries.title FROM users LEFT JOIN saved_queries ON users.id = saved_queries.user_id;',
+      expectedResult: 'SELECT users.username, saved_queries.title FROM users LEFT JOIN saved_queries ON users.id = saved_queries.user_id;',
+    },
+  ],
+  'aggregation': [
+    {
+      id: 'count-basics',
+      title: 'COUNT Function',
+      content: 'COUNT() function returns the number of rows that match a specified condition.',
+      exampleQuery: 'SELECT COUNT(*) as total_users FROM users;',
+      exerciseQuery: 'SELECT COUNT(*) as total_users FROM users;',
+      expectedResult: 'SELECT COUNT(*) as total_users FROM users;',
+    },
+    {
+      id: 'group-by',
+      title: 'GROUP BY Clause',
+      content: 'GROUP BY groups rows that have the same values into summary rows.',
+      exampleQuery: 'SELECT COUNT(*) as query_count, user_id FROM saved_queries GROUP BY user_id;',
+      exerciseQuery: 'SELECT COUNT(*) as query_count, user_id FROM saved_queries GROUP BY user_id;',
+      expectedResult: 'SELECT COUNT(*) as query_count, user_id FROM saved_queries GROUP BY user_id;',
+    },
+  ],
+  'subqueries': [
+    {
+      id: 'basic-subquery',
+      title: 'Basic Subquery',
+      content: 'A subquery is a query nested inside another query.',
+      exampleQuery: 'SELECT username FROM users WHERE id IN (SELECT user_id FROM saved_queries);',
+      exerciseQuery: 'SELECT username FROM users WHERE id IN (SELECT user_id FROM saved_queries);',
+      expectedResult: 'SELECT username FROM users WHERE id IN (SELECT user_id FROM saved_queries);',
+    },
+    {
+      id: 'correlated-subquery',
+      title: 'Correlated Subquery',
+      content: 'A correlated subquery is a subquery that uses values from the outer query.',
+      exampleQuery: 'SELECT username FROM users u WHERE EXISTS (SELECT 1 FROM saved_queries s WHERE s.user_id = u.id);',
+      exerciseQuery: 'SELECT username FROM users u WHERE EXISTS (SELECT 1 FROM saved_queries s WHERE s.user_id = u.id);',
+      expectedResult: 'SELECT username FROM users u WHERE EXISTS (SELECT 1 FROM saved_queries s WHERE s.user_id = u.id);',
+    },
+  ],
 };
 
 const TutorialLesson: React.FC = () => {
@@ -53,7 +105,6 @@ const TutorialLesson: React.FC = () => {
   const [currentQuery, setCurrentQuery] = useState('');
   const [queryResult, setQueryResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const tutorialLessons = tutorialId ? lessons[tutorialId] : [];
   const currentLesson = tutorialLessons[activeStep];
@@ -76,7 +127,6 @@ const TutorialLesson: React.FC = () => {
 
   const handleExecuteQuery = async () => {
     setIsLoading(true);
-    setError(null);
 
     try {
       // Here you would typically call your API to execute the query
@@ -89,7 +139,7 @@ const TutorialLesson: React.FC = () => {
         ],
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      // Handle errors appropriately
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +177,7 @@ const TutorialLesson: React.FC = () => {
         <Typography variant="h6" gutterBottom>
           Example Query:
         </Typography>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 3, height: '200px' }}>
           <SQLEditor
             value={currentLesson.exampleQuery}
             onChange={() => {}}
@@ -146,7 +196,7 @@ const TutorialLesson: React.FC = () => {
           {currentLesson.hint}
         </Typography>
         
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 3, height: '200px' }}>
           <SQLEditor
             value={currentQuery}
             onChange={(value) => setCurrentQuery(value || '')}
@@ -155,7 +205,7 @@ const TutorialLesson: React.FC = () => {
           />
         </Box>
 
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 3, height: '300px' }}>
           <ResultsPanel
             result={queryResult}
             isLoading={isLoading}

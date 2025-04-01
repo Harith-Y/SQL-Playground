@@ -7,7 +7,11 @@ import {
   CardActions,
   Button,
   Grid,
-  Paper,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {

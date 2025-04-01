@@ -4,7 +4,6 @@ import {
   Toolbar,
   Typography,
   Button,
-  IconButton,
   Box,
 } from '@mui/material';
 import {
