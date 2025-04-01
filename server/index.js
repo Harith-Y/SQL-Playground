@@ -1,11 +1,22 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
+const RedisStore = require('connect-redis').default;
+const { createClient } = require('redis');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Redis client
+let redisClient;
+if (process.env.NODE_ENV === 'production') {
+    redisClient = createClient({
+        url: process.env.REDIS_URL
+    });
+    redisClient.connect().catch(console.error);
+}
 
 // Middleware
 app.use(cors({
@@ -16,7 +27,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
+
+// Session configuration
+const sessionConfig = {
     secret: process.env.SESSION_SECRET || 'my-secret-key',
     resave: false,
     saveUninitialized: false,
@@ -25,7 +38,17 @@ app.use(session({
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
-}));
+};
+
+// Use Redis store in production
+if (process.env.NODE_ENV === 'production' && redisClient) {
+    sessionConfig.store = new RedisStore({
+        client: redisClient,
+        prefix: 'sql_playground:'
+    });
+}
+
+app.use(session(sessionConfig));
 
 // Authentication middleware
 const requireAuth = (req, res, next) => {
