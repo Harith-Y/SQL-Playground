@@ -116,7 +116,6 @@ const Playground = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Navbar onExecuteQuery={() => handleQueryExecute()} />
       <Box sx={{ 
         display: 'flex', 
         flexGrow: 1,
@@ -178,11 +177,16 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Playground />} />
-          <Route path="/tutorials" element={<Tutorials />} />
-          <Route path="/tutorials/:tutorialId" element={<TutorialLesson />} />
-        </Routes>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Navbar />
+          <Box sx={{ flexGrow: 1 }}>
+            <Routes>
+              <Route path="/" element={<Playground />} />
+              <Route path="/tutorials" element={<Tutorials />} />
+              <Route path="/tutorials/:tutorialId" element={<TutorialLesson />} />
+            </Routes>
+          </Box>
+        </Box>
       </BrowserRouter>
     </ThemeProvider>
   );
