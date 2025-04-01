@@ -12,6 +12,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import SQLEditor from './SQLEditor';
 import ResultsPanel from './ResultsPanel';
+import QueryVisualization from './QueryVisualization';
 
 interface Lesson {
   id: string;
@@ -109,6 +110,20 @@ const TutorialLesson: React.FC = () => {
   const tutorialLessons = tutorialId ? lessons[tutorialId] : [];
   const currentLesson = tutorialLessons[activeStep];
 
+  // Sample table data for visualization
+  const sampleTables = {
+    users: [
+      { id: 1, username: 'john_doe', email: 'john@example.com' },
+      { id: 2, username: 'jane_smith', email: 'jane@example.com' },
+      { id: 3, username: 'bob_wilson', email: 'bob@example.com' },
+    ],
+    saved_queries: [
+      { id: 1, user_id: 1, title: 'My First Query', query: 'SELECT * FROM users;' },
+      { id: 2, user_id: 1, title: 'User Count', query: 'SELECT COUNT(*) FROM users;' },
+      { id: 3, user_id: 2, title: 'Email List', query: 'SELECT email FROM users;' },
+    ],
+  };
+
   const handleNext = () => {
     if (activeStep === tutorialLessons.length - 1) {
       navigate('/tutorials');
@@ -130,12 +145,13 @@ const TutorialLesson: React.FC = () => {
 
     try {
       // Here you would typically call your API to execute the query
-      // For now, we'll just simulate a successful query
+      // For now, we'll simulate a successful query with sample data
       setQueryResult({
         success: true,
         results: [
-          { username: 'john_doe', email: 'john@example.com' },
-          { username: 'jane_smith', email: 'jane@example.com' },
+          { username: 'john_doe', email: 'john@example.com', title: 'My First Query' },
+          { username: 'john_doe', email: 'john@example.com', title: 'User Count' },
+          { username: 'jane_smith', email: 'jane@example.com', title: 'Email List' },
         ],
       });
     } catch (err) {
@@ -212,7 +228,15 @@ const TutorialLesson: React.FC = () => {
           />
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        {queryResult && (
+          <QueryVisualization
+            query={currentQuery}
+            result={queryResult}
+            tables={sampleTables}
+          />
+        )}
+
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
           <Button
             variant="outlined"
             onClick={handleBack}
