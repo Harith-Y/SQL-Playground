@@ -64,28 +64,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(data.user);
             return data;
         } catch (error) {
+            console.error('Login error:', error);
             throw error;
         }
     };
 
     const register = async (username: string, email: string, password: string) => {
         try {
+            console.log('Attempting registration with:', { username, email });
             const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ username, email, password }),
             });
 
             if (!response.ok) {
                 const error = await response.json();
+                console.error('Registration error response:', error);
                 throw new Error(error.error || 'Registration failed');
             }
 
             const data = await response.json();
+            console.log('Registration successful:', data);
             return data;
         } catch (error) {
+            console.error('Registration error:', error);
             throw error;
         }
     };
@@ -98,7 +104,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             });
             setUser(null);
         } catch (error) {
-            console.error('Logout failed:', error);
+            console.error('Logout error:', error);
+            throw error;
         }
     };
 

@@ -44,9 +44,11 @@ if (process.env.NODE_ENV === 'production' && process.env.REDIS_URL) {
 // Middleware
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? process.env.CLIENT_URL 
+        ? [process.env.CLIENT_URL, 'https://sql-playground-git-main-harith-ys-projects.vercel.app']
         : 'http://localhost:3000',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
