@@ -18,6 +18,10 @@ interface AuthProviderProps {
     children: ReactNode;
 }
 
+// Use a proper backend URL - this should be set in your .env file
+// If not set, we'll use a fallback
+const API_URL = process.env.REACT_APP_API_URL || 'https://sql-playground-git-main-harith-ys-projects.vercel.app';
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
@@ -25,14 +29,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log('Using API URL:', API_URL);
         checkAuth();
     }, []);
 
     const checkAuth = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
-                credentials: 'include'
+            // Use the correct API URL
+            const response = await fetch(`${API_URL}/api/auth/me`, {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                }
             });
+            
             if (response.ok) {
                 const userData = await response.json();
                 setUser(userData);
@@ -46,14 +56,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 credentials: 'include',
                 body: JSON.stringify({ email, password }),
             });
+
+            // Handle non-JSON responses
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
 
             if (!response.ok) {
                 const error = await response.json();
@@ -72,14 +89,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const register = async (username: string, email: string, password: string) => {
         try {
             console.log('Attempting registration with:', { username, email });
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
+            console.log('Registration endpoint:', `${API_URL}/api/auth/register`);
+            
+            const response = await fetch(`${API_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 credentials: 'include',
                 body: JSON.stringify({ username, email, password }),
             });
+
+            // Better error handling for non-JSON responses
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
 
             if (!response.ok) {
                 const error = await response.json();
@@ -98,7 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const logout = async () => {
         try {
-            await fetch(`${process.env.REACT_APP_API_URL}/api/auth/logout`, {
+            await fetch(`${API_URL}/api/auth/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -122,4 +148,4 @@ export const useAuth = (): AuthContextType => {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
-}; 
+};
