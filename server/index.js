@@ -11,11 +11,34 @@ const PORT = process.env.PORT || 5000;
 
 // Initialize Redis client
 let redisClient;
-if (process.env.NODE_ENV === 'production') {
-    redisClient = createClient({
-        url: process.env.REDIS_URL
-    });
-    redisClient.connect().catch(console.error);
+if (process.env.NODE_ENV === 'production' && process.env.REDIS_URL) {
+    try {
+        redisClient = createClient({
+            url: process.env.REDIS_URL,
+            socket: {
+                reconnectStrategy: (retries) => {
+                    if (retries > 10) {
+                        console.log('Max reconnection attempts reached, using in-memory session store');
+                        return new Error('Max reconnection attempts reached');
+                    }
+                    return Math.min(retries * 100, 3000);
+                },
+                connectTimeout: 10000
+            }
+        });
+
+        redisClient.on('error', (err) => {
+            console.error('Redis Client Error:', err);
+        });
+
+        redisClient.on('connect', () => {
+            console.log('Redis Client Connected');
+        });
+
+        redisClient.connect().catch(console.error);
+    } catch (error) {
+        console.error('Failed to initialize Redis client:', error);
+    }
 }
 
 // Middleware
@@ -30,7 +53,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session configuration
 const sessionConfig = {
-    secret: process.env.SESSION_SECRET || 'my-secret-key',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -42,10 +65,16 @@ const sessionConfig = {
 
 // Use Redis store in production
 if (process.env.NODE_ENV === 'production' && redisClient) {
-    sessionConfig.store = new RedisStore({
-        client: redisClient,
-        prefix: 'sql_playground:'
-    });
+    try {
+        sessionConfig.store = new RedisStore({
+            client: redisClient,
+            prefix: 'sql_playground:',
+            disableTouch: true
+        });
+        console.log('Using Redis session store');
+    } catch (error) {
+        console.error('Failed to initialize Redis store:', error);
+    }
 }
 
 app.use(session(sessionConfig));
