@@ -48,7 +48,8 @@ app.use(cors({
             process.env.CLIENT_URL, 
             'https://sql-playground-git-main-harith-ys-projects.vercel.app',
             'https://sql-playground-eight.vercel.app',
-            'https://sql-playground-e58mxr904-harith-ys-projects.vercel.app'
+            'https://sql-playground-e58mxr904-harith-ys-projects.vercel.app',
+            'https://sql-playground-75na67c47-harith-ys-projects.vercel.app' // Added your specific frontend origin
           ]
         : 'http://localhost:3000',
     credentials: true,
@@ -65,8 +66,20 @@ app.options('*', cors());
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin) {
-        res.header('Access-Control-Allow-Origin', origin);
-        res.header('Access-Control-Allow-Credentials', 'true');
+        const allowedOrigins = process.env.NODE_ENV === 'production' 
+            ? [
+                process.env.CLIENT_URL, 
+                'https://sql-playground-git-main-harith-ys-projects.vercel.app',
+                'https://sql-playground-eight.vercel.app',
+                'https://sql-playground-e58mxr904-harith-ys-projects.vercel.app',
+                'https://sql-playground-75na67c47-harith-ys-projects.vercel.app'
+              ]
+            : ['http://localhost:3000'];
+            
+        if (allowedOrigins.includes(origin)) {
+            res.header('Access-Control-Allow-Origin', origin);
+            res.header('Access-Control-Allow-Credentials', 'true');
+        }
     }
     next();
 });
@@ -118,6 +131,13 @@ if (!fs.existsSync(path.join(__dirname, 'routes'))) {
 
 // Auth routes (public)
 app.use('/api/auth', require('./auth'));
+
+// Add route to handle /auth/* requests without /api prefix
+app.use('/auth', (req, res, next) => {
+    // Forward the request to /api/auth
+    req.url = '/api' + req.originalUrl;
+    app.handle(req, res);
+});
 
 // Protected API Routes
 app.use('/api/queries', requireAuth, require('./routes/queries'));
