@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const checkAuth = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/me`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
                 credentials: 'include'
             });
             if (response.ok) {
@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const register = async (username: string, email: string, password: string) => {
         try {
             console.log('Attempting registration with:', { username, email });
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const logout = async () => {
         try {
-            await fetch(`${process.env.REACT_APP_API_URL}/auth/logout`, {
+            await fetch(`${process.env.REACT_APP_API_URL}/api/auth/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });
