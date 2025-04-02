@@ -46,10 +46,7 @@ app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
         ? [
             process.env.CLIENT_URL, 
-            'https://sql-playground-git-main-harith-ys-projects.vercel.app',
-            'https://sql-playground-eight.vercel.app',
-            'https://sql-playground-e58mxr904-harith-ys-projects.vercel.app',
-            'https://sql-playground-75na67c47-harith-ys-projects.vercel.app' // Added your specific frontend origin
+            'https://sql-playground-eight.vercel.app'
           ]
         : 'http://localhost:3000',
     credentials: true,
@@ -69,10 +66,7 @@ app.use((req, res, next) => {
         const allowedOrigins = process.env.NODE_ENV === 'production' 
             ? [
                 process.env.CLIENT_URL, 
-                'https://sql-playground-git-main-harith-ys-projects.vercel.app',
-                'https://sql-playground-eight.vercel.app',
-                'https://sql-playground-e58mxr904-harith-ys-projects.vercel.app',
-                'https://sql-playground-75na67c47-harith-ys-projects.vercel.app'
+                'https://sql-playground-eight.vercel.app'
               ]
             : ['http://localhost:3000'];
             
@@ -131,13 +125,6 @@ if (!fs.existsSync(path.join(__dirname, 'routes'))) {
 
 // Auth routes (public)
 app.use('/api/auth', require('./auth'));
-
-// Add route to handle /auth/* requests without /api prefix
-app.use('/auth', (req, res, next) => {
-    // Forward the request to /api/auth
-    req.url = '/api' + req.originalUrl;
-    app.handle(req, res);
-});
 
 // Protected API Routes
 app.use('/api/queries', requireAuth, require('./routes/queries'));
