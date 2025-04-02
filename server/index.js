@@ -47,7 +47,8 @@ app.use(cors({
         ? [
             process.env.CLIENT_URL, 
             'https://sql-playground-git-main-harith-ys-projects.vercel.app',
-            'https://sql-playground-eight.vercel.app'
+            'https://sql-playground-eight.vercel.app',
+            'https://sql-playground-e58mxr904-harith-ys-projects.vercel.app'
           ]
         : 'http://localhost:3000',
     credentials: true,
@@ -59,6 +60,16 @@ app.use(cors({
 
 // Handle preflight requests explicitly
 app.options('*', cors());
+
+// Ensure CORS headers are set for all responses
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin) {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
