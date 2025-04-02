@@ -149,15 +149,6 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-// Add a catch-all route for non-GET requests in production
-if (process.env.NODE_ENV === 'production') {
-    app.all('*', (req, res) => {
-        if (req.method !== 'GET') {
-            res.status(405).json({ error: 'Method not allowed' });
-        }
-    });
-}
-
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
