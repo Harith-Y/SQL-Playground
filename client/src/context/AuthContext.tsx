@@ -20,7 +20,7 @@ interface AuthProviderProps {
 
 // Use a proper backend URL - this should be set in your .env file
 // If not set, we'll use a fallback
-const API_URL = process.env.REACT_APP_API_URL || 'https://sql-playground-git-main-harith-ys-projects.vercel.app';
+const API_URL = process.env.REACT_APP_API_URL || 'https://sql-playground-eight.vercel.app';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
