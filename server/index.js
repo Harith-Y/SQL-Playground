@@ -81,6 +81,14 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Add request logging middleware
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    next();
+});
+
 // Session configuration
 const sessionConfig = {
     secret: process.env.SESSION_SECRET,
@@ -123,10 +131,8 @@ if (!fs.existsSync(path.join(__dirname, 'routes'))) {
     fs.mkdirSync(path.join(__dirname, 'routes'));
 }
 
-// Auth routes (public)
+// API Routes must come before the React catch-all route
 app.use('/api/auth', require('./auth'));
-
-// Protected API Routes
 app.use('/api/queries', requireAuth, require('./routes/queries'));
 app.use('/api/schema', requireAuth, require('./routes/schema'));
 
@@ -136,10 +142,19 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Handle React routing in production
+// Handle React routing in production - this should be the last route
 if (process.env.NODE_ENV === 'production') {
     app.get('*', (req, res) => {
         res.sendFile(path.join(__dirname, '../client/build/index.html'));
+    });
+}
+
+// Add a catch-all route for non-GET requests in production
+if (process.env.NODE_ENV === 'production') {
+    app.all('*', (req, res) => {
+        if (req.method !== 'GET') {
+            res.status(405).json({ error: 'Method not allowed' });
+        }
     });
 }
 
