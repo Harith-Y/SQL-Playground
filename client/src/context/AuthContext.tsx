@@ -89,13 +89,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const register = async (username: string, email: string, password: string) => {
         try {
             console.log('Attempting registration with:', { username, email });
-            console.log('Registration endpoint:', `${API_URL}/api/auth/register`);
-            
-            const response = await fetch(`${API_URL}/api/auth/register`, {
+            const baseUrl = process.env.REACT_APP_API_URL?.replace(/\/+$/, ''); // Remove trailing slashes
+            const response = await fetch(`${baseUrl}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
                 },
                 credentials: 'include',
                 body: JSON.stringify({ username, email, password }),

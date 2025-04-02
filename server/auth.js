@@ -5,12 +5,15 @@ const db = require('./database');
 
 // Register endpoint
 router.post('/register', async (req, res) => {
+    console.log('Register endpoint hit');
+    console.log('Request body:', req.body);
     const { username, email, password } = req.body;
     
     try {
         // Check if user already exists
         const existingUser = await db.get('SELECT * FROM users WHERE email = ? OR username = ?', [email, username]);
         if (existingUser) {
+            console.log('User already exists:', email);
             return res.status(400).json({ error: 'Username or email already exists' });
         }
 
@@ -24,6 +27,7 @@ router.post('/register', async (req, res) => {
             [username, email, passwordHash]
         );
 
+        console.log('User created successfully:', result.lastID);
         res.status(201).json({ message: 'User created successfully', userId: result.lastID });
     } catch (error) {
         console.error('Registration error:', error);
