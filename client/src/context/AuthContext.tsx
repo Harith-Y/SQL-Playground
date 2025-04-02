@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const register = async (username: string, email: string, password: string) => {
         try {
             console.log('Attempting registration with:', { username, email });
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

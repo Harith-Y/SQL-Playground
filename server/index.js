@@ -58,25 +58,20 @@ const sessionConfig = {
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { 
+    cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 };
 
-// Use Redis store in production
+// Use Redis store in production, memory store in development
 if (process.env.NODE_ENV === 'production' && redisClient) {
-    try {
-        sessionConfig.store = new RedisStore({
-            client: redisClient,
-            prefix: 'sql_playground:',
-            disableTouch: true
-        });
-        console.log('Using Redis session store');
-    } catch (error) {
-        console.error('Failed to initialize Redis store:', error);
-    }
+    sessionConfig.store = new RedisStore({
+        client: redisClient,
+        prefix: 'session:'
+    });
 }
 
 app.use(session(sessionConfig));
