@@ -33,10 +33,12 @@ if (!fs.existsSync(path.join(__dirname, 'routes'))) {
 const queriesRouter = require('./routes/queries');
 const schemaRouter = require('./routes/schema');
 const historyRouter = require('./routes/history');
+const savedQueriesRoutes = require('./routes/saved-queries');
 
 app.use('/api/queries', queriesRouter);
 app.use('/api/schema', schemaRouter);
 app.use('/api/history', historyRouter);
+app.use('/api/saved-queries', savedQueriesRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

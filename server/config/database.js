@@ -20,6 +20,15 @@ function initializeUserDatabase(db) {
             query TEXT NOT NULL,
             executed_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
+
+        // Create saved queries table
+        db.run(`CREATE TABLE IF NOT EXISTS saved_queries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            query TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
     });
 }
 

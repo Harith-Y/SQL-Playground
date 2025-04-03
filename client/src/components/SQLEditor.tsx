@@ -1,8 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Paper, Box, Typography, Button, CircularProgress } from '@mui/material';
-import { PlayArrow, History } from '@mui/icons-material';
+import { Paper, Box, Typography, Button, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { PlayArrow, History, Star, StarBorder, BookmarkBorder } from '@mui/icons-material';
 import Editor from '@monaco-editor/react';
 import QueryHistory from './QueryHistory';
+import SavedQueries from './SavedQueries';
+import axios from 'axios';
+import { auth } from '../services/firebase';
 
 interface SQLEditorProps {
   value: string;
@@ -24,6 +27,9 @@ SELECT * FROM users;`;
 
   const editorRef = useRef<any>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [savedQueriesOpen, setSavedQueriesOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [queryTitle, setQueryTitle] = useState('');
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
@@ -58,6 +64,50 @@ SELECT * FROM users;`;
     setHistoryOpen(false);
   };
 
+  const handleSavedQuerySelect = (query: string) => {
+    if (editorRef.current) {
+      editorRef.current.setValue(query);
+    }
+    setSavedQueriesOpen(false);
+  };
+
+  const handleSaveQuery = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert('Please log in to save queries');
+      return;
+    }
+    setSaveDialogOpen(true);
+  };
+
+  const handleSaveDialogClose = () => {
+    setSaveDialogOpen(false);
+    setQueryTitle('');
+  };
+
+  const handleSaveDialogConfirm = async () => {
+    if (queryTitle.trim() && value.trim()) {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Please log in to save queries');
+        return;
+      }
+
+      try {
+        await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/saved-queries`, {
+          userId: user.uid,
+          title: queryTitle.trim(),
+          query: value.trim()
+        });
+        setSaveDialogOpen(false);
+        setQueryTitle('');
+      } catch (error) {
+        console.error('Error saving query:', error);
+        alert('Failed to save query');
+      }
+    }
+  };
+
   return (
     <>
       <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -67,12 +117,32 @@ SELECT * FROM users;`;
             <Button
               variant="outlined"
               size="small"
+              startIcon={<StarBorder />}
+              onClick={() => setSavedQueriesOpen(true)}
+              disabled={isLoading || readOnly}
+              sx={{ mr: 1 }}
+            >
+              Saved
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
               startIcon={<History />}
               onClick={() => setHistoryOpen(true)}
               disabled={isLoading || readOnly}
               sx={{ mr: 1 }}
             >
               History
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<BookmarkBorder />}
+              onClick={handleSaveQuery}
+              disabled={isLoading || readOnly || !value.trim()}
+              sx={{ mr: 1 }}
+            >
+              Fav
             </Button>
             <Button
               variant="contained"
@@ -109,6 +179,30 @@ SELECT * FROM users;`;
         onClose={() => setHistoryOpen(false)}
         onSelectQuery={handleHistorySelect}
       />
+      <SavedQueries
+        open={savedQueriesOpen}
+        onClose={() => setSavedQueriesOpen(false)}
+        onSelectQuery={handleSavedQuerySelect}
+      />
+      <Dialog open={saveDialogOpen} onClose={handleSaveDialogClose}>
+        <DialogTitle>Save Query</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Query Title"
+            fullWidth
+            value={queryTitle}
+            onChange={(e) => setQueryTitle(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSaveDialogClose}>Cancel</Button>
+          <Button onClick={handleSaveDialogConfirm} variant="contained" disabled={!queryTitle.trim()}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
