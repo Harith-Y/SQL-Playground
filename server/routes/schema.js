@@ -1,10 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
+const { getUserDatabase } = require('../config/database');
 
 router.get('/', async (req, res) => {
+  const { userId } = req.query;
+  
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
   try {
-    // Get all tables in the database
+    // Get the user's specific database
+    const db = getUserDatabase(userId);
+
+    // Get all tables in the user's database
     db.all("SELECT name FROM sqlite_master WHERE type='table'", [], (err, tables) => {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -43,6 +52,7 @@ router.get('/', async (req, res) => {
       });
     });
   } catch (error) {
+    console.error('Schema fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });

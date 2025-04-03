@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
+const { getUserDatabase } = require('../config/database');
 
 router.post('/execute', async (req, res) => {
-  const { query } = req.body;
+  const { query, userId } = req.body;
   
   if (!query) {
     return res.status(400).json({ error: 'Query is required' });
+  }
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
   }
 
   // List of dangerous SQL commands to prevent
@@ -27,6 +31,9 @@ router.post('/execute', async (req, res) => {
   }
 
   try {
+    // Get the user's specific database
+    const db = getUserDatabase(userId);
+
     // Clean the query by removing comments and extra whitespace
     const cleanQuery = query
       .split('\n')
