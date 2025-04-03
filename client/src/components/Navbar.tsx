@@ -1,49 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
   Typography,
   Button,
   Box,
+  IconButton,
 } from '@mui/material';
-import {
-  Storage as StorageIcon,
-  School as SchoolIcon,
-  Home as HomeIcon,
-} from '@mui/icons-material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { auth, getCurrentUser, logoutUser } from '../services/firebase';
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const isHome = location.pathname === '/';
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <AppBar position="static">
       <Toolbar>
-        <StorageIcon sx={{ mr: 2 }} />
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           SQL Playground
         </Typography>
-        
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {!isHome && (
-            <Button
-              color="inherit"
-              startIcon={<HomeIcon />}
-              onClick={() => navigate('/')}
-            >
-              Home
-            </Button>
+        <Box>
+          {user ? (
+            <>
+              <Button color="inherit" onClick={() => navigate('/')}>
+                Playground
+              </Button>
+              <Button color="inherit" onClick={() => navigate('/tutorials')}>
+                Tutorials
+              </Button>
+              <Button color="inherit" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button color="inherit" onClick={() => navigate('/login')}>
+                Login
+              </Button>
+              <Button color="inherit" onClick={() => navigate('/register')}>
+                Register
+              </Button>
+            </>
           )}
-          
-          <Button
-            color="inherit"
-            startIcon={<SchoolIcon />}
-            onClick={() => navigate('/tutorials')}
-          >
-            Tutorials
-          </Button>
         </Box>
       </Toolbar>
     </AppBar>

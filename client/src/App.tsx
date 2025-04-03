@@ -1,15 +1,17 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Box, Snackbar, Alert } from '@mui/material';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SQLEditor from './components/SQLEditor';
 import ResultsPanel from './components/ResultsPanel';
 import SchemaViewer from './components/SchemaViewer';
 import Tutorials from './components/Tutorials';
 import TutorialLesson from './components/TutorialLesson';
+import Login from './components/Login';
+import Register from './components/Register';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
+import { auth } from './services/firebase';
 
 const theme = createTheme({
   palette: {
@@ -47,6 +49,30 @@ const defaultSchema: SchemaDefinition = {
       ],
     },
   },
+};
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  return <>{children}</>;
 };
 
 const Playground = () => {
@@ -181,9 +207,32 @@ function App() {
           <Navbar />
           <Box sx={{ flexGrow: 1 }}>
             <Routes>
-              <Route path="/" element={<Playground />} />
-              <Route path="/tutorials" element={<Tutorials />} />
-              <Route path="/tutorials/:tutorialId" element={<TutorialLesson />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Playground />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tutorials"
+                element={
+                  <ProtectedRoute>
+                    <Tutorials />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tutorials/:tutorialId"
+                element={
+                  <ProtectedRoute>
+                    <TutorialLesson />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Box>
         </Box>
