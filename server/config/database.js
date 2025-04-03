@@ -11,6 +11,18 @@ if (!fs.existsSync(dbDir)) {
 // Create a map to store database connections
 const dbConnections = new Map();
 
+// Function to initialize user's database with required tables
+function initializeUserDatabase(db) {
+    db.serialize(() => {
+        // Create query history table
+        db.run(`CREATE TABLE IF NOT EXISTS query_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            query TEXT NOT NULL,
+            executed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+    });
+}
+
 // Function to get or create a database connection for a user
 function getUserDatabase(userId) {
     if (!userId) {
@@ -31,6 +43,7 @@ function getUserDatabase(userId) {
             console.error(`Error connecting to user database ${userId}:`, err);
         } else {
             console.log(`Connected to user database ${userId}`);
+            initializeUserDatabase(db);
         }
     });
 

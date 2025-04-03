@@ -34,6 +34,18 @@ router.post('/execute', async (req, res) => {
     // Get the user's specific database
     const db = getUserDatabase(userId);
 
+    // Save query to history
+    await new Promise((resolve, reject) => {
+      db.run(
+        "INSERT INTO query_history (query) VALUES (?)",
+        [query],
+        function(err) {
+          if (err) reject(err);
+          else resolve(this.lastID);
+        }
+      );
+    });
+
     // Clean the query by removing comments and extra whitespace
     const cleanQuery = query
       .split('\n')
@@ -46,7 +58,7 @@ router.post('/execute', async (req, res) => {
     if (cleanQuery.toUpperCase().startsWith('SELECT')) {
       // First, get the list of tables to check case sensitivity
       const tables = await new Promise((resolve, reject) => {
-        db.all("SELECT name FROM sqlite_master WHERE type='table'", [], (err, rows) => {
+        db.all("SELECT name FROM sqlite_master WHERE type='table' AND name != 'sqlite_sequence'", [], (err, rows) => {
           if (err) reject(err);
           else resolve(rows.map(row => row.name));
         });

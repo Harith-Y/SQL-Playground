@@ -13,8 +13,8 @@ router.get('/', async (req, res) => {
     // Get the user's specific database
     const db = getUserDatabase(userId);
 
-    // Get all tables in the user's database, excluding sqlite_sequence
-    db.all("SELECT name FROM sqlite_master WHERE type='table' AND name != 'sqlite_sequence'", [], (err, tables) => {
+    // Get all tables in the user's database, excluding sqlite_sequence and query_history
+    db.all("SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN ('sqlite_sequence', 'query_history')", [], (err, tables) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
