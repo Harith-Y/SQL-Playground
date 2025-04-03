@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { auth } from './firebase';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
@@ -24,26 +23,10 @@ export interface SchemaDefinition {
   };
 }
 
-const getAuthHeader = async () => {
-  const user = auth.currentUser;
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
-  const token = await user.getIdToken();
-  return {
-    Authorization: `Bearer ${token}`
-  };
-};
-
 export const executeQuery = async (query: string): Promise<QueryResult> => {
   try {
     console.log('Executing query:', query);
-    const headers = await getAuthHeader();
-    const response = await axios.post(
-      `${API_BASE_URL}/api/queries/execute`,
-      { query },
-      { headers }
-    );
+    const response = await axios.post(`${API_BASE_URL}/api/queries/execute`, { query });
     console.log('Server response:', response.data);
     
     // Ensure the response has the correct structure
@@ -74,8 +57,7 @@ export const executeQuery = async (query: string): Promise<QueryResult> => {
 
 export const fetchSchema = async (): Promise<SchemaDefinition> => {
   try {
-    const headers = await getAuthHeader();
-    const response = await axios.get(`${API_BASE_URL}/api/schema`, { headers });
+    const response = await axios.get(`${API_BASE_URL}/api/schema`);
     return response.data;
   } catch (error) {
     console.error('Error fetching schema:', error);
