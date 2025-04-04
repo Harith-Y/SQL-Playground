@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { FaPalette } from 'react-icons/fa';
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 const ThemeButton = styled.button`
   background: none;
@@ -89,8 +89,7 @@ const Button = styled.button`
 const ThemeSelector: React.FC = () => {
   const { currentTheme, savedThemes, setCurrentTheme, saveTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
-  const [newTheme, setNewTheme] = useState({
-    name: '',
+  const [newTheme, setNewTheme] = useState<{ colors: DefaultTheme['colors'] }>({
     colors: {
       primary: '#007bff',
       secondary: '#6c757d',
@@ -99,16 +98,18 @@ const ThemeSelector: React.FC = () => {
       accent: '#28a745'
     }
   });
+  const [themeName, setThemeName] = useState('');
 
   const handleSaveTheme = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await saveTheme({
         id: `custom-${Date.now()}`,
-        ...newTheme
+        name: themeName,
+        colors: newTheme.colors
       });
+      setThemeName('');
       setNewTheme({
-        name: '',
         colors: { ...currentTheme.colors }
       });
     } catch (error) {
@@ -144,8 +145,8 @@ const ThemeSelector: React.FC = () => {
           <Input
             type="text"
             placeholder="Theme Name"
-            value={newTheme.name}
-            onChange={e => setNewTheme({ ...newTheme, name: e.target.value })}
+            value={themeName}
+            onChange={e => setThemeName(e.target.value)}
             required
           />
           {Object.entries(newTheme.colors).map(([key, value]) => (
@@ -156,7 +157,6 @@ const ThemeSelector: React.FC = () => {
                 value={value}
                 onChange={e =>
                   setNewTheme({
-                    ...newTheme,
                     colors: { ...newTheme.colors, [key]: e.target.value }
                   })
                 }

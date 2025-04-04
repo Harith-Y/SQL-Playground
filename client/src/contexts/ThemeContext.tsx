@@ -1,16 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { DefaultTheme } from 'styled-components';
 
-interface Theme {
+interface Theme extends DefaultTheme {
   id: string;
   name: string;
-  colors: {
-    primary: string;
-    secondary: string;
-    background: string;
-    text: string;
-    accent: string;
-  };
 }
 
 interface ThemeContextType {
