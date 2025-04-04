@@ -97,6 +97,44 @@ const lessons: Record<string, Lesson[]> = {
       expectedResult: 'SELECT username FROM users u WHERE EXISTS (SELECT 1 FROM saved_queries s WHERE s.user_id = u.id);',
     },
   ],
+  'debugging': [
+    {
+      id: 'syntax-errors',
+      title: 'Syntax Error Detection',
+      content: 'Learn how to identify and fix common SQL syntax errors. Syntax errors occur when the SQL statement doesn\'t follow the correct structure or format.',
+      exampleQuery: 'SELECT username, email FROM users WHERE id = 1;',
+      exerciseQuery: 'SELECT username email FROM users WHERE id = 1;', // Intentionally incorrect
+      expectedResult: 'SELECT username, email FROM users WHERE id = 1;',
+      hint: 'Look for missing commas between column names in the SELECT statement.',
+    },
+    {
+      id: 'logical-errors',
+      title: 'Logical Error Detection',
+      content: 'Learn how to identify logical errors in SQL queries. Logical errors occur when the query runs without syntax errors but produces incorrect results.',
+      exampleQuery: 'SELECT COUNT(*) FROM users WHERE email LIKE "%@example.com";',
+      exerciseQuery: 'SELECT COUNT(*) FROM users WHERE email = "@example.com";', // Intentionally incorrect
+      expectedResult: 'SELECT COUNT(*) FROM users WHERE email LIKE "%@example.com";',
+      hint: 'Check if you\'re using the correct comparison operator for pattern matching.',
+    },
+    {
+      id: 'performance-issues',
+      title: 'Performance Issues',
+      content: 'Learn how to identify and fix performance issues in SQL queries. Common issues include missing indexes, inefficient joins, and suboptimal query structure.',
+      exampleQuery: 'SELECT u.username, q.title FROM users u INNER JOIN saved_queries q ON u.id = q.user_id WHERE u.id = 1;',
+      exerciseQuery: 'SELECT u.username, q.title FROM users u, saved_queries q WHERE u.id = q.user_id AND u.id = 1;', // Intentionally inefficient
+      expectedResult: 'SELECT u.username, q.title FROM users u INNER JOIN saved_queries q ON u.id = q.user_id WHERE u.id = 1;',
+      hint: 'Consider using explicit JOIN syntax instead of implicit joins for better readability and performance.',
+    },
+    {
+      id: 'null-handling',
+      title: 'NULL Value Handling',
+      content: 'Learn how to properly handle NULL values in SQL queries. NULL values can cause unexpected results if not handled correctly.',
+      exampleQuery: 'SELECT username FROM users WHERE email IS NOT NULL;',
+      exerciseQuery: 'SELECT username FROM users WHERE email != NULL;', // Intentionally incorrect
+      expectedResult: 'SELECT username FROM users WHERE email IS NOT NULL;',
+      hint: 'Remember that NULL values require special comparison operators (IS NULL, IS NOT NULL).',
+    },
+  ],
 };
 
 const TutorialLesson: React.FC = () => {

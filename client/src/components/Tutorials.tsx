@@ -19,6 +19,7 @@ import {
   Code as CodeIcon,
   DataObject as DataObjectIcon,
   TableChart as TableChartIcon,
+  BugReport as BugReportIcon,
 } from '@mui/icons-material';
 
 interface Tutorial {
@@ -57,6 +58,13 @@ const tutorials: Tutorial[] = [
     description: 'Explore nested queries, correlated subqueries, and how to use them effectively in your SQL statements.',
     icon: <SchoolIcon sx={{ fontSize: 40 }} />,
     difficulty: 'Advanced',
+  },
+  {
+    id: 'debugging',
+    title: 'SQL Debugging',
+    description: 'Learn how to identify and fix common SQL errors, understand error messages, and debug complex queries.',
+    icon: <BugReportIcon sx={{ fontSize: 40 }} />,
+    difficulty: 'Intermediate',
   },
 ];
 
