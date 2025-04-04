@@ -5,7 +5,10 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User
+  User,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -54,6 +57,24 @@ export const getCurrentUser = (): Promise<User | null> => {
       resolve(user);
     });
   });
+};
+
+export const changePassword = async (currentPassword: string, newPassword: string) => {
+  try {
+    const user = auth.currentUser;
+    if (!user || !user.email) {
+      throw new Error('No user is currently signed in');
+    }
+
+    // Reauthenticate user before changing password
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+
+    // Update password
+    await updatePassword(user, newPassword);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Password change failed');
+  }
 };
 
 export { auth }; 
