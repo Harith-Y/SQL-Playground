@@ -7,12 +7,17 @@ import {
   Button,
   Box,
   IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
 } from '@mui/material';
 import { auth, getCurrentUser, logoutUser } from '../services/firebase';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -31,13 +36,27 @@ const Navbar = () => {
     }
   };
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleChangePassword = () => {
+    handleMenuClose();
+    // TODO: Implement change password functionality
+    console.log('Change password clicked');
+  };
+
   return (
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           SQL Playground
         </Typography>
-        <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {user ? (
             <>
               <Button color="inherit" onClick={() => navigate('/')}>
@@ -46,9 +65,25 @@ const Navbar = () => {
               <Button color="inherit" onClick={() => navigate('/tutorials')}>
                 Tutorials
               </Button>
-              <Button color="inherit" onClick={handleLogout}>
-                Logout
-              </Button>
+              <IconButton
+                onClick={handleMenuOpen}
+                size="large"
+                edge="end"
+                color="inherit"
+                sx={{ ml: 2 }}
+              >
+                <Avatar sx={{ width: 32, height: 32 }}>
+                  <AccountCircleIcon />
+                </Avatar>
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleChangePassword}>Change Password</MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
             </>
           ) : (
             <>
