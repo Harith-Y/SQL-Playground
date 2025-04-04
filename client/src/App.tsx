@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { ThemeProvider as MuiThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Box, Snackbar, Alert } from '@mui/material';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -14,6 +14,8 @@ import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 import { auth } from './services/firebase';
+import { ThemeProvider } from './contexts/ThemeContext';
+import ThemeSelector from './components/ThemeSelector';
 
 const theme = createTheme({
   palette: {
@@ -202,16 +204,32 @@ const Playground = () => {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <Navbar />
-          <Box sx={{ flexGrow: 1 }}>
+    <ThemeProvider>
+      <MuiThemeProvider theme={createTheme({
+        palette: {
+          mode: 'dark',
+          primary: {
+            main: '#90caf9',
+          },
+          secondary: {
+            main: '#f48fb1',
+          },
+          background: {
+            default: '#1a1a1a',
+            paper: '#2d2d2d',
+          },
+        },
+      })}>
+        <CssBaseline />
+        <BrowserRouter>
+          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <Navbar>
+              <ThemeSelector />
+            </Navbar>
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/forgotpassword" element={<ForgotPassword />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route
                 path="/"
                 element={
@@ -229,7 +247,7 @@ function App() {
                 }
               />
               <Route
-                path="/tutorials/:tutorialId"
+                path="/tutorials/:lessonId"
                 element={
                   <ProtectedRoute>
                     <TutorialLesson />
@@ -246,8 +264,8 @@ function App() {
               />
             </Routes>
           </Box>
-        </Box>
-      </BrowserRouter>
+        </BrowserRouter>
+      </MuiThemeProvider>
     </ThemeProvider>
   );
 }
