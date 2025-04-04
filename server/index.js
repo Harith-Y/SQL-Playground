@@ -3,7 +3,6 @@ const cors = require('cors');
 const session = require('express-session');
 const path = require('path');
 require('dotenv').config();
-require('./config/firebase-admin'); // Initialize Firebase Admin
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,13 +34,11 @@ const queriesRouter = require('./routes/queries');
 const schemaRouter = require('./routes/schema');
 const historyRouter = require('./routes/history');
 const savedQueriesRoutes = require('./routes/saved-queries');
-const themesRouter = require('./routes/themes');
 
 app.use('/api/queries', queriesRouter);
 app.use('/api/schema', schemaRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/saved-queries', savedQueriesRoutes);
-app.use('/api/themes', themesRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

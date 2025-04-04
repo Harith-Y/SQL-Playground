@@ -20,11 +20,7 @@ import {
 import { auth, getCurrentUser, logoutUser, changePassword } from '../services/firebase';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-interface NavbarProps {
-  children?: React.ReactNode;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ children }) => {
+const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -118,7 +114,6 @@ const Navbar: React.FC<NavbarProps> = ({ children }) => {
                 <Button color="inherit" onClick={() => navigate('/challenges')}>
                   Challenges
                 </Button>
-                {children}
                 <IconButton
                   onClick={handleMenuOpen}
                   size="large"
