@@ -8,6 +8,7 @@ import ResultsPanel from './components/ResultsPanel';
 import SchemaViewer from './components/SchemaViewer';
 import Tutorials from './components/Tutorials';
 import TutorialLesson from './components/TutorialLesson';
+import Challenges from './components/Challenges';
 import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
@@ -232,6 +233,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <TutorialLesson />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/challenges"
+                element={
+                  <ProtectedRoute>
+                    <Challenges />
                   </ProtectedRoute>
                 }
               />
