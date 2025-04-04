@@ -100,6 +100,16 @@ const Login = () => {
             >
               Sign In
             </Button>
+            <Box sx={{ textAlign: 'center', mb: 2 }}>
+              <Link
+                component="button"
+                variant="body2"
+                onClick={() => navigate('/forgotpassword')}
+                sx={{ cursor: 'pointer' }}
+              >
+                Forgot Password?
+              </Link>
+            </Box>
             <Box sx={{ textAlign: 'center' }}>
               <Link href="/register" variant="body2">
                 Don't have an account? Sign Up

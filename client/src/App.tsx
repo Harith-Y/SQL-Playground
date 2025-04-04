@@ -10,6 +10,7 @@ import Tutorials from './components/Tutorials';
 import TutorialLesson from './components/TutorialLesson';
 import Login from './components/Login';
 import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 import { auth } from './services/firebase';
 
@@ -209,6 +210,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgotpassword" element={<ForgotPassword />} />
               <Route
                 path="/"
                 element={

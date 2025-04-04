@@ -8,7 +8,9 @@ import {
   User,
   updatePassword,
   EmailAuthProvider,
-  reauthenticateWithCredential
+  reauthenticateWithCredential,
+  sendPasswordResetEmail,
+  sendEmailVerification
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -27,7 +29,11 @@ const auth = getAuth(app);
 export const registerUser = async (email: string, password: string) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    const user = userCredential.user;
+    
+    // Send verification email
+    await sendEmailVerification(user);
+    return user;
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Registration failed');
   }
@@ -74,6 +80,14 @@ export const changePassword = async (currentPassword: string, newPassword: strin
     await updatePassword(user, newPassword);
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Password change failed');
+  }
+};
+
+export const sendPasswordReset = async (email: string) => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Failed to send password reset email');
   }
 };
 
