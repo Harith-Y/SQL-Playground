@@ -6,6 +6,7 @@ import QueryHistory from './QueryHistory';
 import SavedQueries from './SavedQueries';
 import axios from 'axios';
 import { auth } from '../services/firebase';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SQLEditorProps {
   value: string;
@@ -13,6 +14,7 @@ interface SQLEditorProps {
   isLoading: boolean;
   onExecuteQuery: (query: string) => void;
   readOnly?: boolean;
+  onQueriesLoad?: (queries: { title: string; query: string; }[]) => void;
 }
 
 const SQLEditor: React.FC<SQLEditorProps> = ({
@@ -21,7 +23,9 @@ const SQLEditor: React.FC<SQLEditorProps> = ({
   isLoading,
   onExecuteQuery,
   readOnly = false,
+  onQueriesLoad,
 }) => {
+  const { currentTheme } = useTheme();
   const defaultQuery = `-- Write your SQL query here
 SELECT * FROM users;`;
 
@@ -110,7 +114,15 @@ SELECT * FROM users;`;
 
   return (
     <>
-      <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Paper
+        elevation={3}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          backgroundColor: currentTheme.colors.editor,
+        }}
+      >
         <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="subtitle2">SQL Editor</Typography>
           <Box>

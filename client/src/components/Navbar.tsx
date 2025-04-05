@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { auth, getCurrentUser, logoutUser, changePassword } from '../services/firebase';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ThemeSelector from '@/components/ThemeSelector';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -114,6 +115,7 @@ const Navbar = () => {
                 <Button color="inherit" onClick={() => navigate('/challenges')}>
                   Challenges
                 </Button>
+                <ThemeSelector />
                 <IconButton
                   onClick={handleMenuOpen}
                   size="large"

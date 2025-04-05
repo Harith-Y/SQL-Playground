@@ -10,8 +10,10 @@ import {
   TableRow,
   Paper,
   Button,
+  CircularProgress,
 } from '@mui/material';
 import { QueryResult } from '../services/api';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ResultsPanelProps {
   result: QueryResult | null;
@@ -20,6 +22,7 @@ interface ResultsPanelProps {
 
 const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { currentTheme } = useTheme();
 
   // Debug logging
   useEffect(() => {
@@ -28,17 +31,37 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Typography>Executing query...</Typography>
-      </Box>
+      <Paper
+        elevation={3}
+        sx={{
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: currentTheme.colors.results,
+        }}
+      >
+        <CircularProgress />
+      </Paper>
     );
   }
 
   if (!result) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Typography>No results to display</Typography>
-      </Box>
+      <Paper
+        elevation={3}
+        sx={{
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: currentTheme.colors.results,
+        }}
+      >
+        <Typography variant="body1" color="text.secondary">
+          No results to display
+        </Typography>
+      </Paper>
     );
   }
 
@@ -54,28 +77,42 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
   if (result.results && Array.isArray(result.results)) {
     if (result.results.length === 0) {
       return (
-        <Box sx={{ p: 2 }}>
-          <Typography>No results found</Typography>
-        </Box>
+        <Paper
+          elevation={3}
+          sx={{
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: currentTheme.colors.results,
+          }}
+        >
+          <Typography variant="body1" color="text.secondary">
+            No results found
+          </Typography>
+        </Paper>
       );
     }
 
     const columns = result.columns || Object.keys(result.results[0]);
 
     return (
-      <Box 
-        ref={containerRef} 
-        sx={{ 
+      <Paper
+        elevation={3}
+        sx={{
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden'
+          backgroundColor: currentTheme.colors.results,
         }}
       >
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="h6">Query Results</Typography>
+        </Box>
         <TableContainer 
           component={Paper}
           sx={{ 
-            flex: 1,
+            flexGrow: 1,
             overflow: 'auto',
             '&::-webkit-scrollbar': {
               width: '8px',
@@ -110,25 +147,38 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
             </TableBody>
           </Table>
         </TableContainer>
-      </Box>
+      </Paper>
     );
   }
 
   // For INSERT, UPDATE, DELETE queries
   return (
-    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography>
-        Query executed successfully. {result.changes} row(s) affected.
-        {result.lastId !== undefined && ` Last inserted ID: ${result.lastId}`}
-      </Typography>
-      <Button
-        variant="contained"
-        onClick={() => window.location.reload()}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        Refresh Results
-      </Button>
-    </Box>
+    <Paper
+      elevation={3}
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: currentTheme.colors.results,
+      }}
+    >
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Typography variant="h6">Query Results</Typography>
+      </Box>
+      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Typography>
+          Query executed successfully. {result.changes} row(s) affected.
+          {result.lastId !== undefined && ` Last inserted ID: ${result.lastId}`}
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => window.location.reload()}
+          sx={{ alignSelf: 'flex-start' }}
+        >
+          Refresh Results
+        </Button>
+      </Box>
+    </Paper>
   );
 };
 

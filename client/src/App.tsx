@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Box, Snackbar, Alert } from '@mui/material';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -14,29 +13,13 @@ import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 import { auth } from './services/firebase';
-
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#90caf9',
-    },
-    secondary: {
-      main: '#f48fb1',
-    },
-    background: {
-      default: '#1a1a1a',
-      paper: '#2d2d2d',
-    },
-  },
-});
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Default schema
 const defaultSchema: SchemaDefinition = {
   tables: {
     users: {
       columns: [
-        { name: 'id', type: 'INTEGER', constraints: 'PRIMARY KEY AUTOINCREMENT' },
         { name: 'username', type: 'TEXT', constraints: 'UNIQUE NOT NULL' },
         { name: 'email', type: 'TEXT', constraints: 'UNIQUE NOT NULL' },
         { name: 'password', type: 'TEXT', constraints: 'NOT NULL' },
@@ -134,55 +117,26 @@ const Playground = () => {
     setError(null);
   };
 
-  const handleSchemaLoad = (newSchema: SchemaDefinition) => {
-    setSchema(newSchema);
-  };
-
   const handleQueriesLoad = (queries: Array<{ title: string; query: string }>) => {
     setSavedQueries(queries);
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Box sx={{ 
-        display: 'flex', 
-        flexGrow: 1,
-        gap: 2,
-        p: 2,
-        overflow: 'hidden'
-      }}>
-        <Box sx={{ 
-          width: '50%', 
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2
-        }}>
-          <Box sx={{ 
-            flex: '1 1 70%', // SQL Editor takes more space
-            minHeight: 0 // Important for nested flex containers
-          }}>
-            <SQLEditor 
-              value={currentQuery}
-              onChange={handleQueryChange}
-              isLoading={isLoading}
-              onExecuteQuery={handleQueryExecute}
-            />
-          </Box>
-          <Box sx={{ 
-            flex: '1 1 30%', // Results panel takes less space
-            minHeight: 0, // Important for nested flex containers
-            maxHeight: '30vh' // Limit maximum height
-          }}>
-            <ResultsPanel 
-              result={queryResult}
-              isLoading={isLoading}
-            />
-          </Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', p: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, height: '100%' }}>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <SQLEditor
+            value={currentQuery}
+            onChange={handleQueryChange}
+            onExecuteQuery={handleQueryExecute}
+            isLoading={isLoading}
+            onQueriesLoad={handleQueriesLoad}
+          />
+          <ResultsPanel result={queryResult} isLoading={isLoading} />
         </Box>
-        <SchemaViewer 
+        <SchemaViewer
           schema={schema}
           queries={savedQueries}
-          onSchemaLoad={handleSchemaLoad}
           onQueriesLoad={handleQueriesLoad}
         />
       </Box>
@@ -202,8 +156,7 @@ const Playground = () => {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ThemeProvider>
       <BrowserRouter>
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Navbar />

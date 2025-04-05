@@ -11,7 +11,6 @@ import {
   Button,
   Stack,
 } from '@mui/material';
-
 import {
   TableChart as TableIcon,
   KeyboardArrowDown as ExpandIcon,
@@ -20,6 +19,7 @@ import {
   Upload as UploadIcon,
 } from '@mui/icons-material';
 import { exportState, importState, SchemaDefinition } from '../services/exportService';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SchemaViewerProps {
   schema: SchemaDefinition;
@@ -28,105 +28,108 @@ interface SchemaViewerProps {
   onQueriesLoad?: (queries: Array<{ title: string; query: string }>) => void;
 }
 
-const SchemaViewer: React.FC<SchemaViewerProps> = ({ 
-  schema, 
+const SchemaViewer: React.FC<SchemaViewerProps> = ({
+  schema,
   queries,
   onSchemaLoad,
   onQueriesLoad,
 }) => {
-  const [expandedTables, setExpandedTables] = React.useState<string[]>([]);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { currentTheme } = useTheme();
+  const [expandedTables, setExpandedTables] = React.useState<Record<string, boolean>>({});
 
   const handleTableClick = (tableName: string) => {
-    setExpandedTables((prev) =>
-      prev.includes(tableName)
-        ? prev.filter((t) => t !== tableName)
-        : [...prev, tableName]
-    );
+    setExpandedTables(prev => ({
+      ...prev,
+      [tableName]: !prev[tableName],
+    }));
   };
 
-  const handleSave = () => {
+  const handleExport = () => {
     exportState(schema, queries);
   };
 
-  const handleLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      importState(file)
-        .then((state) => {
-          if (onSchemaLoad) onSchemaLoad(state.schema);
-          if (onQueriesLoad) onQueriesLoad(state.queries);
-        })
-        .catch((error) => {
-          console.error('Error loading state:', error);
-          // You might want to show an error message to the user here
-        });
+      try {
+        const { schema: importedSchema, queries: importedQueries } = await importState(file);
+        onSchemaLoad?.(importedSchema);
+        onQueriesLoad?.(importedQueries);
+      } catch (error) {
+        console.error('Error importing schema:', error);
+      }
     }
   };
 
   return (
-    <Paper sx={{ width: '50%', overflow: 'hidden' }}>
-      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle1">Database Schema</Typography>
-          <Stack direction="row" spacing={1}>
-            <Button
-              size="small"
-              startIcon={<SaveIcon />}
-              onClick={handleSave}
-              variant="outlined"
-            >
-              Save
-            </Button>
-            <Button
-              size="small"
-              startIcon={<UploadIcon />}
-              onClick={() => fileInputRef.current?.click()}
-              variant="outlined"
-            >
-              Load
-            </Button>
+    <Paper
+      elevation={3}
+      sx={{
+        width: '30%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: currentTheme.colors.schema,
+      }}
+    >
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Typography variant="h6">Database Schema</Typography>
+        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<SaveIcon />}
+            onClick={handleExport}
+          >
+            Export
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            component="label"
+            startIcon={<UploadIcon />}
+          >
+            Import
             <input
               type="file"
-              ref={fileInputRef}
-              onChange={handleLoad}
+              hidden
               accept=".json"
-              style={{ display: 'none' }}
+              onChange={handleImport}
             />
-          </Stack>
+          </Button>
         </Stack>
       </Box>
-      <List sx={{ overflow: 'auto', height: 'calc(100% - 41px)' }}>
-        {Object.entries(schema.tables).map(([tableName, table]) => (
-          <React.Fragment key={tableName}>
-            <ListItem
-              component="button"
-              onClick={() => handleTableClick(tableName)}
-            >
-              <ListItemIcon>
-                <TableIcon />
-              </ListItemIcon>
-              <ListItemText primary={tableName} />
-              {expandedTables.includes(tableName) ? <ExpandIcon /> : <CollapseIcon />}
-            </ListItem>
-            <Collapse in={expandedTables.includes(tableName)}>
-              <List component="div" disablePadding>
-                {table.columns.map((column) => (
-                  <ListItem
-                    key={column.name}
-                    sx={{ pl: 4 }}
-                  >
-                    <ListItemText
-                      primary={column.name}
-                      secondary={`${column.type} ${column.constraints}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Collapse>
-          </React.Fragment>
-        ))}
-      </List>
+      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
+        <List>
+          {Object.entries(schema.tables).map(([tableName, table]) => (
+            <React.Fragment key={tableName}>
+              <ListItem
+                button
+                onClick={() => handleTableClick(tableName)}
+                sx={{ pl: 2 }}
+              >
+                <ListItemIcon>
+                  <TableIcon />
+                </ListItemIcon>
+                <ListItemText primary={tableName} />
+                {expandedTables[tableName] ? <ExpandIcon /> : <CollapseIcon />}
+              </ListItem>
+              <Collapse in={expandedTables[tableName]} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {table.columns.map((column) => (
+                    <ListItem key={column.name} sx={{ pl: 6 }}>
+                      <ListItemText
+                        primary={column.name}
+                        secondary={`${column.type} ${column.constraints}`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </React.Fragment>
+          ))}
+        </List>
+      </Box>
     </Paper>
   );
 };
