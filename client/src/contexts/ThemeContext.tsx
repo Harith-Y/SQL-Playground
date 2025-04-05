@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { auth, db } from '../services/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 interface CustomTheme {
   name: string;
@@ -46,75 +46,97 @@ const ThemeContext = createContext<ThemeContextType>({
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [themes, setThemes] = useState<CustomTheme[]>([defaultTheme]);
   const [currentTheme, setCurrentTheme] = useState<CustomTheme>(defaultTheme);
+  const [themes, setThemes] = useState<CustomTheme[]>([defaultTheme]);
 
   useEffect(() => {
-    const loadThemes = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const userThemesRef = doc(db, 'userThemes', user.uid);
-      const docSnap = await getDoc(userThemesRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setThemes(data.themes);
-        setCurrentTheme(data.currentTheme);
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // Load user's themes from Firestore
+        const userDocRef = doc(db, 'userThemes', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setThemes(userData.themes || [defaultTheme]);
+          setCurrentTheme(userData.currentTheme || defaultTheme);
+        } else {
+          // Create new document for user with default theme
+          await setDoc(userDocRef, {
+            themes: [defaultTheme],
+            currentTheme: defaultTheme,
+          });
+        }
       } else {
-        // Initialize with default theme
-        await setDoc(userThemesRef, {
-          themes: [defaultTheme],
-          currentTheme: defaultTheme,
-        });
+        // Reset to default theme when user logs out
+        setThemes([defaultTheme]);
+        setCurrentTheme(defaultTheme);
       }
-    };
+    });
 
-    loadThemes();
+    return () => unsubscribe();
   }, []);
 
   const addTheme = async (theme: CustomTheme) => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const userThemesRef = doc(db, 'userThemes', user.uid);
     const newThemes = [...themes, theme];
     setThemes(newThemes);
-    await setDoc(userThemesRef, { themes: newThemes, currentTheme }, { merge: true });
+
+    const userDocRef = doc(db, 'userThemes', user.uid);
+    await updateDoc(userDocRef, {
+      themes: newThemes,
+    });
   };
 
   const updateTheme = async (theme: CustomTheme) => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const userThemesRef = doc(db, 'userThemes', user.uid);
     const newThemes = themes.map(t => t.name === theme.name ? theme : t);
     setThemes(newThemes);
-    if (currentTheme.name === theme.name) {
-      setCurrentTheme(theme);
-    }
-    await setDoc(userThemesRef, { themes: newThemes, currentTheme: theme }, { merge: true });
+
+    const userDocRef = doc(db, 'userThemes', user.uid);
+    await updateDoc(userDocRef, {
+      themes: newThemes,
+    });
   };
 
   const deleteTheme = async (themeName: string) => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const userThemesRef = doc(db, 'userThemes', user.uid);
     const newThemes = themes.filter(t => t.name !== themeName);
     setThemes(newThemes);
-    if (currentTheme.name === themeName) {
-      setCurrentTheme(defaultTheme);
-    }
-    await setDoc(userThemesRef, { themes: newThemes, currentTheme: defaultTheme }, { merge: true });
+
+    const userDocRef = doc(db, 'userThemes', user.uid);
+    await updateDoc(userDocRef, {
+      themes: newThemes,
+    });
+  };
+
+  const handleSetCurrentTheme = async (theme: CustomTheme) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setCurrentTheme(theme);
+
+    const userDocRef = doc(db, 'userThemes', user.uid);
+    await updateDoc(userDocRef, {
+      currentTheme: theme,
+    });
   };
 
   const muiTheme = createTheme({
     palette: {
       mode: 'dark',
+      primary: {
+        main: currentTheme.colors.text,
+      },
       background: {
         default: currentTheme.colors.background,
-        paper: currentTheme.colors.schema,
+        paper: currentTheme.colors.background,
       },
       text: {
         primary: currentTheme.colors.text,
@@ -130,7 +152,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addTheme,
         updateTheme,
         deleteTheme,
-        setCurrentTheme,
+        setCurrentTheme: handleSetCurrentTheme,
       }}
     >
       <MuiThemeProvider theme={muiTheme}>

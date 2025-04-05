@@ -13,7 +13,7 @@ import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 import { auth } from './services/firebase';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 
 // Default schema
 const defaultSchema: SchemaDefinition = {
@@ -155,10 +155,18 @@ const Playground = () => {
 };
 
 function App() {
+  const { currentTheme } = useTheme();
+
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          minHeight: '100vh',
+          backgroundColor: currentTheme.colors.background,
+          color: currentTheme.colors.text
+        }}>
           <Navbar />
           <Box sx={{ flexGrow: 1 }}>
             <Routes>

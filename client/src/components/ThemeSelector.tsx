@@ -91,12 +91,16 @@ const ThemeSelector: React.FC = () => {
   const handleSaveTheme = async () => {
     if (!editingTheme?.name.trim()) return;
 
-    if (themes.some(t => t.name === editingTheme.name && t !== editingTheme)) {
-      await updateTheme(editingTheme);
-    } else {
-      await addTheme(editingTheme);
+    try {
+      if (themes.some(t => t.name === editingTheme.name && t !== editingTheme)) {
+        await updateTheme(editingTheme);
+      } else {
+        await addTheme(editingTheme);
+      }
+      handleDialogClose();
+    } catch (error) {
+      console.error('Error saving theme:', error);
     }
-    handleDialogClose();
   };
 
   const handleColorChange = (color: ColorResult) => {
