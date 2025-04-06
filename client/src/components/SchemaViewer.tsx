@@ -28,6 +28,8 @@ interface SchemaViewerProps {
   onQueriesLoad?: (queries: Array<{ title: string; query: string }>) => void;
 }
 
+const SYSTEM_TABLES = ['users', 'saved_queries'];
+
 const SchemaViewer: React.FC<SchemaViewerProps> = ({
   schema,
   queries,
@@ -60,6 +62,11 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
       }
     }
   };
+
+  // Filter out system tables
+  const userTables = Object.entries(schema.tables).filter(
+    ([tableName]) => !SYSTEM_TABLES.includes(tableName)
+  );
 
   return (
     <Paper
@@ -100,35 +107,43 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
         </Stack>
       </Box>
       <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
-        <List>
-          {Object.entries(schema.tables).map(([tableName, table]) => (
-            <React.Fragment key={tableName}>
-              <ListItem
-                button
-                onClick={() => handleTableClick(tableName)}
-                sx={{ pl: 2 }}
-              >
-                <ListItemIcon>
-                  <TableIcon />
-                </ListItemIcon>
-                <ListItemText primary={tableName} />
-                {expandedTables[tableName] ? <ExpandIcon /> : <CollapseIcon />}
-              </ListItem>
-              <Collapse in={expandedTables[tableName]} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {table.columns.map((column) => (
-                    <ListItem key={column.name} sx={{ pl: 6 }}>
-                      <ListItemText
-                        primary={column.name}
-                        secondary={`${column.type} ${column.constraints}`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            </React.Fragment>
-          ))}
-        </List>
+        {userTables.length > 0 ? (
+          <List>
+            {userTables.map(([tableName, table]) => (
+              <React.Fragment key={tableName}>
+                <ListItem
+                  button
+                  onClick={() => handleTableClick(tableName)}
+                  sx={{ pl: 2 }}
+                >
+                  <ListItemIcon>
+                    <TableIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={tableName} />
+                  {expandedTables[tableName] ? <ExpandIcon /> : <CollapseIcon />}
+                </ListItem>
+                <Collapse in={expandedTables[tableName]} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {table.columns.map((column) => (
+                      <ListItem key={column.name} sx={{ pl: 6 }}>
+                        <ListItemText
+                          primary={column.name}
+                          secondary={`${column.type} ${column.constraints}`}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+              </React.Fragment>
+            ))}
+          </List>
+        ) : (
+          <Box sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary">
+              No tables to display
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Paper>
   );
