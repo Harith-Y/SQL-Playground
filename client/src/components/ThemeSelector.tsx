@@ -97,9 +97,12 @@ const ThemeSelector: React.FC = () => {
       } else {
         await addTheme(editingTheme);
       }
-      handleDialogClose();
     } catch (error) {
       console.error('Error saving theme:', error);
+      alert('Failed to save theme. Please check your internet connection and try again.');
+    } finally {
+      setOpenDialog(false);
+      setEditingTheme(null);
     }
   };
 
