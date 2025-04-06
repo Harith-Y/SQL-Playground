@@ -1,38 +1,68 @@
-# Interactive SQL Playground
+# SQL Playground
 
-An interactive web application for learning and practicing SQL commands with real-time visual feedback. This platform provides an engaging environment for students and developers to learn SQL through hands-on practice and visual demonstrations.
+A modern, interactive SQL learning and practice environment built with React, TypeScript, and Firebase.
+
+![SQL Playground Screenshot](client/public/logo512.png)
 
 ## Features
 
+### Core Features
 - **Interactive SQL Editor**
-  - Real-time query execution
-  - Error detection and suggestions
-  - Query history and favorites
-  - Syntax highlighting and auto-completion (Future Update)
+  - Monaco Editor integration for a professional coding experience
+  - Syntax highlighting and auto-completion
+  - Query execution with real-time results
+  - Error handling and validation
 
-- **Visual Learning Tools**
-  - Real-time database schema visualization
-  - Animated SQL join demonstrations
-  - Query execution plan visualization
-  - Table relationship diagrams
+- **Schema Visualization**
+  - Interactive database schema viewer
+  - Table structure visualization
+  - Relationship mapping
+  - Schema import/export functionality
 
-- **Learning Resources**
-  - Interactive tutorials for SQL concepts
-  - Built-in examples and exercises
-  - Progress tracking and achievements
-  - Step-by-step guided lessons
+- **Query Management**
+  - Save and organize your SQL queries
+  - Query history tracking
+  - Favorite queries for quick access
+  - Query sharing capabilities
 
-- **Collaboration Features**
-  - Save and share queries with others
-  - Export/import database schemas
-  - Collaborative workspaces
-  - Community-driven examples
+### Learning Tools
+- **Tutorials**
+  - Structured learning paths
+  - Interactive lessons
+  - Progress tracking
+  - Hands-on exercises
 
-- **User Experience**
-  - Modern, responsive interface
-  - Dark/Light theme support
-  - Keyboard shortcuts
-  - Mobile-friendly design
+- **Challenges**
+  - Real-world SQL problems
+  - Difficulty levels (Beginner to Advanced)
+  - Solution validation
+  - Performance metrics
+
+### User Experience
+- **Customizable UI**
+  - User-specific theme customization
+  - Dark/Light mode support
+  - Custom color schemes
+  - Responsive design
+
+- **Authentication**
+  - Secure user authentication
+  - Email/password login
+  - Password reset functionality
+  - Account management
+
+### Advanced Features
+- **Query Visualization**
+  - Visual representation of query execution
+  - Performance analysis
+  - Query optimization suggestions
+  - Execution plan visualization
+
+- **Data Import/Export**
+  - CSV/JSON data import
+  - Query result export
+  - Schema migration tools
+  - Backup and restore functionality
 
 ## Tech Stack
 
@@ -62,43 +92,37 @@ An interactive web application for learning and practicing SQL commands with rea
 - **Code Quality**: ESLint
 - **Testing**: React Testing Library, Jest
 
-## Prerequisites
+## Getting Started
 
+### Prerequisites
 - Node.js (v14 or higher)
-- npm (v6 or higher)
+- npm or yarn
 - Git
+- Firebase account
 
-## Setup Instructions
+### Installation
 
-1. Clone the repository:
+1. Clone the repository
 ```bash
-git clone <repository-url>
-cd sql-playground
+git clone https://github.com/Harith-Y/SQL-Playground.git
+cd SQL-Playground
 ```
 
-2. Install dependencies:
+2. Install dependencies
 ```bash
-npm install
 cd client
 npm install
-cd ..
 ```
 
-3. Create a `.env` file in the root directory with the following variables:
-```
-PORT=5000
-SESSION_SECRET=my_session_secret
-FIREBASE_API_KEY=my_firebase_api_key
-FIREBASE_AUTH_DOMAIN=my_firebase_auth_domain
-FIREBASE_PROJECT_ID=my_firebase_project_id
-```
+3. Configure Firebase
+- Create a new Firebase project
+- Enable Authentication and Firestore
+- Add your Firebase configuration to `client/src/services/firebase.ts`
 
-4. Start the development server:
+4. Start the development server
 ```bash
-npm run dev:full
+npm start
 ```
-
-This will start both the backend server and frontend development server concurrently.
 
 ## Project Structure
 
@@ -107,19 +131,13 @@ sql-playground/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/    # React components
-│   │   ├── pages/        # Page components
-│   │   ├── hooks/        # Custom React hooks
-│   │   ├── utils/        # Utility functions
-│   │   ├── types/        # TypeScript type definitions
-│   │   └── styles/       # CSS and theme files
+│   │   ├── contexts/      # Theme contet
+│   │   ├── services/      # Backend Services
+│   │   └── types/        # TypeScript type definitions
 ├── server/                # Node.js backend
 │   ├── routes/           # API routes
-│   ├── controllers/      # Route controllers
-│   ├── models/          # Database models
-│   ├── middleware/      # Express middleware
-│   └── utils/           # Utility functions
+│   └── config/           # Database configuration
 ├── database/            # SQLite database files
-└── public/             # Static assets
 ```
 
 ## Development Scripts
@@ -132,11 +150,40 @@ sql-playground/
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ## License
 
-This project is licensed.
+This project, **SQL Playground**, was created by **Harith Yerragolam**.
+<br><br>
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, subject to the following conditions:
+<br>
+<ul style="list-style-type:none;">
+  <li>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</li>
+</ul>
+<br>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+
+## Acknowledgments
+
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+- [Material-UI](https://mui.com/)
+- [Firebase](https://firebase.google.com/)
+- [React](https://reactjs.org/)
+
+## Contact
+
+Harith Yerragolam - [@harith-yerragolam](https://www.linkedin.com/in/harith-yerragolam-617486288/)
+
+Project Link: [https://github.com/Harith-Y/SQL-Playground](https://github.com/Harith-Y/SQL-Playground)
