@@ -16,6 +16,7 @@
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",
+    "@types/react-color": "^3.0.13",
     "axios": "^1.6.7",
     "d3": "^7.8.5",
     "firebase": "^11.6.0",
@@ -53,7 +54,6 @@
     ]
   },
   "devDependencies": {
-    "@craco/craco": "^7.1.0",
-    "@types/react-color": "^3.0.13"
+    "@craco/craco": "^7.1.0"
   }
 }
