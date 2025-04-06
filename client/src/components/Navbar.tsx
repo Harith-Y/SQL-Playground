@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { auth, getCurrentUser, logoutUser, changePassword } from '../services/firebase';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ThemeSelector from '@/components/ThemeSelector';
+import ThemeSelector from './ThemeSelector';
 
 const Navbar = () => {
   const navigate = useNavigate();
