@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { ThemeProvider as MUIThemeProvider, createTheme } from '@mui/material';
 
 interface AuthThemeContextType {
@@ -60,7 +60,19 @@ const lightTheme = createTheme({
 });
 
 export const AuthThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check localStorage first, then system preference
+    const savedTheme = localStorage.getItem('authTheme');
+    if (savedTheme) {
+      return savedTheme === 'dark';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    // Save theme preference to localStorage whenever it changes
+    localStorage.setItem('authTheme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
 
   const theme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 

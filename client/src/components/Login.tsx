@@ -12,9 +12,12 @@ import {
 } from '@mui/material';
 import { loginUser } from '../services/firebase';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import AuthThemeToggle from './AuthThemeToggle';
+import { useAuthTheme } from '../contexts/AuthThemeContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { isDarkMode } = useAuthTheme();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -52,6 +55,7 @@ const Login = () => {
         py: 4,
       }}
     >
+      <AuthThemeToggle />
       <Container maxWidth="sm">
         <Box
           sx={{
@@ -69,25 +73,25 @@ const Login = () => {
               alignItems: 'center',
               width: '100%',
               borderRadius: 4,
-              background: 'rgba(255, 255, 255, 0.85)',
+              background: isDarkMode ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(10px)',
               transition: 'transform 0.3s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-5px)',
               },
               '& .MuiTypography-root': {
-                color: '#333',
+                color: isDarkMode ? '#fff' : '#333',
               },
               '& .MuiInputLabel-root': {
-                color: '#333',
+                color: isDarkMode ? '#fff' : '#333',
                 '&.Mui-focused': {
-                  color: '#000',
+                  color: isDarkMode ? '#fff' : '#000',
                 },
               },
               '& .MuiOutlinedInput-root': {
-                color: '#333',
+                color: isDarkMode ? '#fff' : '#333',
                 '& fieldset': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
+                  borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
                 },
                 '&:hover fieldset': {
                   borderColor: 'primary.main',

@@ -8,22 +8,22 @@ import {
   Container,
   Paper,
   Link,
-  Alert,
   Avatar,
 } from '@mui/material';
 import { registerUser } from '../services/firebase';
-import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import AuthThemeToggle from './AuthThemeToggle';
+import { useAuthTheme } from '../contexts/AuthThemeContext';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { isDarkMode } = useAuthTheme();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,41 +35,18 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    setLoading(true);
+    setError('');
 
-    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    // Validate password length
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setLoading(false);
       return;
     }
 
     try {
       await registerUser(formData.email, formData.password);
-      setSuccess('Registration successful! Please check your email for verification link.');
-      // Clear form
-      setFormData({
-        email: '',
-        password: '',
-        confirmPassword: '',
-      });
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+      navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -84,6 +61,7 @@ const Register = () => {
         py: 4,
       }}
     >
+      <AuthThemeToggle />
       <Container maxWidth="sm">
         <Box
           sx={{
@@ -101,25 +79,25 @@ const Register = () => {
               alignItems: 'center',
               width: '100%',
               borderRadius: 4,
-              background: 'rgba(255, 255, 255, 0.85)',
+              background: isDarkMode ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(10px)',
               transition: 'transform 0.3s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-5px)',
               },
               '& .MuiTypography-root': {
-                color: '#333',
+                color: isDarkMode ? '#fff' : '#333',
               },
               '& .MuiInputLabel-root': {
-                color: '#333',
+                color: isDarkMode ? '#fff' : '#333',
                 '&.Mui-focused': {
-                  color: '#000',
+                  color: isDarkMode ? '#fff' : '#000',
                 },
               },
               '& .MuiOutlinedInput-root': {
-                color: '#333',
+                color: isDarkMode ? '#fff' : '#333',
                 '& fieldset': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
+                  borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
                 },
                 '&:hover fieldset': {
                   borderColor: 'primary.main',
@@ -139,22 +117,12 @@ const Register = () => {
                 boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
               }}
             >
-              <PersonAddOutlinedIcon fontSize="large" />
+              <PersonAddIcon fontSize="large" />
             </Avatar>
             <Typography component="h1" variant="h4" sx={{ mt: 2, mb: 3, fontWeight: 'bold' }}>
               Create Account
             </Typography>
             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-              {error && (
-                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
-                  {error}
-                </Alert>
-              )}
-              {success && (
-                <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
-                  {success}
-                </Alert>
-              )}
               <TextField
                 margin="normal"
                 required
@@ -215,6 +183,11 @@ const Register = () => {
                   },
                 }}
               />
+              {error && (
+                <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
+                  {error}
+                </Typography>
+              )}
               <Button
                 type="submit"
                 fullWidth
@@ -232,17 +205,14 @@ const Register = () => {
                     background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
                   },
                 }}
-                disabled={loading}
               >
-                {loading ? 'Creating Account...' : 'Sign Up'}
+                Sign Up
               </Button>
               <Box sx={{ textAlign: 'center' }}>
                 <Link
-                  component="button"
+                  href="/login"
                   variant="body2"
-                  onClick={() => navigate('/login')}
                   sx={{
-                    cursor: 'pointer',
                     color: 'primary.main',
                     '&:hover': {
                       textDecoration: 'underline',
