@@ -11,9 +11,11 @@ import Challenges from './components/Challenges';
 import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
+import Dashboard from './components/Dashboard';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 import { auth } from './services/firebase';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Default schema
 const defaultSchema: SchemaDefinition = {
@@ -37,23 +39,13 @@ const defaultSchema: SchemaDefinition = {
 };
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { currentUser, loading } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
+  if (!currentUser) {
     return <Navigate to="/login" />;
   }
 
@@ -159,56 +151,66 @@ function App() {
 
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          minHeight: '100vh',
-          backgroundColor: currentTheme.colors.background,
-          color: currentTheme.colors.text
-        }}>
-          <Navbar />
-          <Box sx={{ flexGrow: 1 }}>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgotpassword" element={<ForgotPassword />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Playground />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tutorials"
-                element={
-                  <ProtectedRoute>
-                    <Tutorials />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tutorials/:tutorialId"
-                element={
-                  <ProtectedRoute>
-                    <TutorialLesson />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/challenges"
-                element={
-                  <ProtectedRoute>
-                    <Challenges />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
+      <AuthProvider>
+        <BrowserRouter>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            minHeight: '100vh',
+            backgroundColor: currentTheme.colors.background,
+            color: currentTheme.colors.text
+          }}>
+            <Navbar />
+            <Box sx={{ flexGrow: 1 }}>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgotpassword" element={<ForgotPassword />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Playground />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tutorials"
+                  element={
+                    <ProtectedRoute>
+                      <Tutorials />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tutorials/:tutorialId"
+                  element={
+                    <ProtectedRoute>
+                      <TutorialLesson />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/challenges"
+                  element={
+                    <ProtectedRoute>
+                      <Challenges />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </Box>
           </Box>
-        </Box>
-      </BrowserRouter>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
