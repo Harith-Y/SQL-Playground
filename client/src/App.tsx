@@ -15,7 +15,9 @@ import Dashboard from './components/Dashboard';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 import { auth } from './services/firebase';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { AuthThemeProvider } from './contexts/AuthThemeContext';
+import { useAuth } from './contexts/AuthContext';
 
 // Default schema
 const defaultSchema: SchemaDefinition = {
@@ -163,14 +165,28 @@ function App() {
             <Navbar />
             <Box sx={{ flexGrow: 1 }}>
               <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgotpassword" element={<ForgotPassword />} />
+                <Route path="/login" element={
+                  <AuthThemeProvider>
+                    <Login />
+                  </AuthThemeProvider>
+                } />
+                <Route path="/register" element={
+                  <AuthThemeProvider>
+                    <Register />
+                  </AuthThemeProvider>
+                } />
+                <Route path="/forgotpassword" element={
+                  <AuthThemeProvider>
+                    <ForgotPassword />
+                  </AuthThemeProvider>
+                } />
                 <Route
                   path="/dashboard"
                   element={
                     <ProtectedRoute>
-                      <Dashboard />
+                      <AuthThemeProvider>
+                        <Dashboard />
+                      </AuthThemeProvider>
                     </ProtectedRoute>
                   }
                 />

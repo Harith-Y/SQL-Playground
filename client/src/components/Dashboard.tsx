@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Paper, Container, Avatar, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Alert } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { changePassword } from '../services/firebase';
+import AuthThemeToggle from './AuthThemeToggle';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -58,13 +59,13 @@ const Dashboard = () => {
         py: 4,
       }}
     >
+      <AuthThemeToggle />
       <Container maxWidth="lg">
         <Paper
           elevation={24}
           sx={{
             p: 4,
             borderRadius: 4,
-            background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
           }}
         >
@@ -86,10 +87,10 @@ const Dashboard = () => {
             >
               {currentUser?.email?.[0].toUpperCase()}
             </Avatar>
-            <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#000' }}>
+            <Typography variant="h4" component="h1" gutterBottom>
               Welcome, {currentUser?.email}
             </Typography>
-            <Typography variant="subtitle1" sx={{ color: '#333' }}>
+            <Typography variant="subtitle1" color="text.secondary">
               Your Personal Dashboard
             </Typography>
           </Box>
@@ -105,16 +106,15 @@ const Dashboard = () => {
               sx={{
                 p: 3,
                 borderRadius: 2,
-                background: 'rgba(255, 255, 255, 0.9)',
               }}
             >
-              <Typography variant="h6" gutterBottom sx={{ color: '#000' }}>
+              <Typography variant="h6" gutterBottom>
                 Account Information
               </Typography>
-              <Typography variant="body1" sx={{ color: '#333' }}>
+              <Typography variant="body1">
                 Email: {currentUser?.email}
               </Typography>
-              <Typography variant="body1" sx={{ color: '#333' }}>
+              <Typography variant="body1">
                 Last Login: {new Date().toLocaleDateString()}
               </Typography>
             </Paper>
@@ -123,19 +123,17 @@ const Dashboard = () => {
               sx={{
                 p: 3,
                 borderRadius: 2,
-                background: 'rgba(255, 255, 255, 0.9)',
               }}
             >
-              <Typography variant="h6" gutterBottom sx={{ color: '#000' }}>
+              <Typography variant="h6" gutterBottom>
                 Quick Actions
               </Typography>
               <Typography 
                 variant="body1" 
                 sx={{ 
-                  color: '#333',
                   cursor: 'pointer',
                   '&:hover': {
-                    color: '#1976d2',
+                    color: 'primary.main',
                     textDecoration: 'underline'
                   }
                 }}
