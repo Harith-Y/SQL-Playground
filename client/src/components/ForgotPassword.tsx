@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Container,
   Box,
-  Typography,
   TextField,
   Button,
+  Typography,
+  Container,
   Paper,
-  Alert,
   Link,
+  Alert,
+  Avatar,
 } from '@mui/material';
 import { sendPasswordReset } from '../services/firebase';
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -37,74 +39,143 @@ const ForgotPassword = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper
-          elevation={3}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 4,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Box
           sx={{
-            padding: 4,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            width: '100%',
           }}
         >
-          <Typography component="h1" variant="h5">
-            Forgot Password
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {success}
-              </Alert>
-            )}
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
+          <Paper
+            elevation={24}
+            sx={{
+              padding: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '100%',
+              borderRadius: 4,
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(10px)',
+              transition: 'transform 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-5px)',
+              },
+              '& .MuiTypography-root': {
+                color: '#333',
+              },
+              '& .MuiInputLabel-root': {
+                color: '#333',
+              },
+              '& .MuiOutlinedInput-root': {
+                color: '#333',
+                '& fieldset': {
+                  borderColor: 'rgba(0, 0, 0, 0.23)',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'primary.main',
+                },
+              },
+            }}
+          >
+            <Avatar
+              sx={{
+                m: 1,
+                bgcolor: 'secondary.main',
+                width: 56,
+                height: 56,
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+              }}
             >
-              {loading ? 'Sending...' : 'Send Reset Link'}
-            </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <Link
-                component="button"
-                variant="body2"
-                onClick={() => navigate('/login')}
-                sx={{ cursor: 'pointer' }}
+              <VpnKeyOutlinedIcon fontSize="large" />
+            </Avatar>
+            <Typography component="h1" variant="h4" sx={{ mt: 2, mb: 3, fontWeight: 'bold' }}>
+              Reset Password
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+              {error && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                  {error}
+                </Alert>
+              )}
+              {success && (
+                <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
+                  {success}
+                </Alert>
+              )}
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                  },
+                }}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  py: 1.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '1.1rem',
+                  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                  boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
+                  },
+                }}
+                disabled={loading}
               >
-                Back to Login
-              </Link>
+                {loading ? 'Sending...' : 'Send Reset Link'}
+              </Button>
+              <Box sx={{ textAlign: 'center' }}>
+                <Link
+                  component="button"
+                  variant="body2"
+                  onClick={() => navigate('/login')}
+                  sx={{
+                    cursor: 'pointer',
+                    color: 'primary.main',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Back to Login
+                </Link>
+              </Box>
             </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+          </Paper>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 
