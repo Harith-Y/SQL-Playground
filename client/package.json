@@ -30,7 +30,7 @@
     "web-vitals": "^3.5.2"
   },
   "scripts": {
-    "start": "craco start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "craco test",
     "eject": "react-scripts eject"
