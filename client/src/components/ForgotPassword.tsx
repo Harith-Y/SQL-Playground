@@ -77,6 +77,9 @@ const ForgotPassword = () => {
               },
               '& .MuiInputLabel-root': {
                 color: '#333',
+                '&.Mui-focused': {
+                  color: '#000',
+                },
               },
               '& .MuiOutlinedInput-root': {
                 color: '#333',
@@ -84,6 +87,9 @@ const ForgotPassword = () => {
                   borderColor: 'rgba(0, 0, 0, 0.23)',
                 },
                 '&:hover fieldset': {
+                  borderColor: 'primary.main',
+                },
+                '&.Mui-focused fieldset': {
                   borderColor: 'primary.main',
                 },
               },
