@@ -116,9 +116,26 @@ const Playground = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', p: 2 }}>
-      <Box sx={{ display: 'flex', gap: 2, height: '100%' }}>
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100vh',
+      p: { xs: 1, sm: 2 },
+      gap: { xs: 1, sm: 2 }
+    }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: { xs: 1, sm: 2 },
+        height: '100%'
+      }}>
+        <Box sx={{ 
+          flex: 1, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: { xs: 1, sm: 2 },
+          minWidth: 0 // Prevents overflow
+        }}>
           <SQLEditor
             value={currentQuery}
             onChange={handleQueryChange}
@@ -128,11 +145,16 @@ const Playground = () => {
           />
           <ResultsPanel result={queryResult} isLoading={isLoading} />
         </Box>
-        <SchemaViewer
-          schema={schema}
-          queries={savedQueries}
-          onQueriesLoad={handleQueriesLoad}
-        />
+        <Box sx={{ 
+          width: { xs: '100%', md: '300px' },
+          minWidth: { xs: '100%', md: '300px' }
+        }}>
+          <SchemaViewer
+            schema={schema}
+            queries={savedQueries}
+            onQueriesLoad={handleQueriesLoad}
+          />
+        </Box>
       </Box>
       <Snackbar
         open={!!error}
