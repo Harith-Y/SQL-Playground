@@ -72,21 +72,23 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
     <Paper
       elevation={3}
       sx={{
-        width: '30%',
+        width: '100%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: currentTheme.colors.schema,
+        overflow: 'hidden',
       }}
     >
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Typography variant="h6">Database Schema</Typography>
+        <Typography variant="h6" sx={{ color: currentTheme.colors.text }}>Database Schema</Typography>
         <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
           <Button
             variant="outlined"
             size="small"
             startIcon={<SaveIcon />}
             onClick={handleExport}
+            sx={{ color: currentTheme.colors.text }}
           >
             Export
           </Button>
@@ -95,6 +97,7 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
             size="small"
             component="label"
             startIcon={<UploadIcon />}
+            sx={{ color: currentTheme.colors.text }}
           >
             Import
             <input
@@ -106,29 +109,85 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
           </Button>
         </Stack>
       </Box>
-      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
+      <Box sx={{ 
+        overflow: 'auto', 
+        flexGrow: 1,
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: currentTheme.colors.background,
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: currentTheme.colors.text,
+          opacity: 0.5,
+          borderRadius: '4px',
+        },
+      }}>
         {userTables.length > 0 ? (
-          <List>
+          <List sx={{ width: '100%' }}>
             {userTables.map(([tableName, table]) => (
               <React.Fragment key={tableName}>
                 <ListItem
                   button
                   onClick={() => handleTableClick(tableName)}
-                  sx={{ pl: 2 }}
+                  sx={{ 
+                    pl: 2,
+                    '&:hover': {
+                      backgroundColor: currentTheme.colors.background,
+                      opacity: 0.8,
+                    },
+                  }}
                 >
                   <ListItemIcon>
-                    <TableIcon />
+                    <TableIcon sx={{ color: currentTheme.colors.text }} />
                   </ListItemIcon>
-                  <ListItemText primary={tableName} />
-                  {expandedTables[tableName] ? <ExpandIcon /> : <CollapseIcon />}
+                  <ListItemText 
+                    primary={tableName}
+                    primaryTypographyProps={{
+                      sx: {
+                        fontWeight: 'medium',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        color: currentTheme.colors.text,
+                      }
+                    }}
+                  />
+                  {expandedTables[tableName] ? 
+                    <ExpandIcon sx={{ color: currentTheme.colors.text }} /> : 
+                    <CollapseIcon sx={{ color: currentTheme.colors.text }} />
+                  }
                 </ListItem>
                 <Collapse in={expandedTables[tableName]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     {table.columns.map((column) => (
-                      <ListItem key={column.name} sx={{ pl: 6 }}>
+                      <ListItem 
+                        key={column.name} 
+                        sx={{ 
+                          pl: 6,
+                          '&:hover': {
+                            backgroundColor: currentTheme.colors.background,
+                            opacity: 0.8,
+                          },
+                        }}
+                      >
                         <ListItemText
                           primary={column.name}
                           secondary={`${column.type} ${column.constraints}`}
+                          primaryTypographyProps={{
+                            sx: {
+                              fontWeight: 'medium',
+                              color: currentTheme.colors.text,
+                            }
+                          }}
+                          secondaryTypographyProps={{
+                            sx: {
+                              fontSize: '0.75rem',
+                              color: currentTheme.colors.text,
+                              opacity: 0.7,
+                            }
+                          }}
                         />
                       </ListItem>
                     ))}
@@ -139,7 +198,7 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
           </List>
         ) : (
           <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{ color: currentTheme.colors.text, opacity: 0.7 }}>
               No tables to display
             </Typography>
           </Box>
