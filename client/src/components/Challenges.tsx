@@ -22,6 +22,15 @@ import {
   TableChart as TableChartIcon,
   Functions as FunctionsIcon,
   Timeline as TimelineIcon,
+  TableRows as TableRowsIcon,
+  AccessTime as AccessTimeIcon,
+  Speed as SpeedIcon,
+  Security as SecurityIcon,
+  Search as SearchIcon,
+  ViewModule as ViewModuleIcon,
+  ViewQuilt as ViewQuiltIcon,
+  Sync as SyncIcon,
+  Backup as BackupIcon,
 } from '@mui/icons-material';
 import SQLEditor from './SQLEditor';
 import ResultsPanel from './ResultsPanel';
@@ -31,7 +40,7 @@ interface Challenge {
   title: string;
   description: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  category: 'Basics' | 'Joins' | 'Aggregation' | 'Subqueries' | 'Window Functions' | 'CTEs';
+  category: 'Basics' | 'Joins' | 'Aggregation' | 'Subqueries' | 'Window Functions' | 'CTEs' | 'Functions' | 'Optimization' | 'Security';
   icon: React.ReactNode;
   problem: string;
   expectedResult: string;
@@ -150,6 +159,116 @@ const challenges: Challenge[] = [
     expectedResult: 'WITH RECURSIVE connected_users AS (SELECT DISTINCT u1.id as user1_id, u2.id as user2_id FROM users u1 INNER JOIN saved_queries sq1 ON u1.id = sq1.user_id INNER JOIN saved_queries sq2 ON sq1.title = sq2.title INNER JOIN users u2 ON u2.id = sq2.user_id WHERE u1.id < u2.id UNION SELECT cu.user1_id, u.id FROM connected_users cu INNER JOIN saved_queries sq1 ON cu.user2_id = sq1.user_id INNER JOIN saved_queries sq2 ON sq1.title = sq2.title INNER JOIN users u ON u.id = sq2.user_id WHERE u.id NOT IN (SELECT user2_id FROM connected_users WHERE user1_id = cu.user1_id)) SELECT DISTINCT u1.username as user1, u2.username as user2 FROM connected_users cu INNER JOIN users u1 ON cu.user1_id = u1.id INNER JOIN users u2 ON cu.user2_id = u2.id;',
     hint: 'Use a recursive CTE to find all connected users through shared queries.',
   },
+  {
+    id: 'pivot-challenge',
+    title: 'Pivot Table Challenge',
+    description: 'Transform rows into columns using conditional aggregation.',
+    difficulty: 'Advanced',
+    category: 'Aggregation',
+    icon: <TableRowsIcon sx={{ fontSize: 40 }} />,
+    problem: 'Create a pivot table showing the count of saved queries by user and difficulty level.',
+    expectedResult: 'SELECT u.username, COUNT(CASE WHEN sq.difficulty = \'Beginner\' THEN 1 END) as beginner_queries, COUNT(CASE WHEN sq.difficulty = \'Intermediate\' THEN 1 END) as intermediate_queries, COUNT(CASE WHEN sq.difficulty = \'Advanced\' THEN 1 END) as advanced_queries FROM users u LEFT JOIN saved_queries sq ON u.id = sq.user_id GROUP BY u.id, u.username;',
+    hint: 'Use CASE statements within COUNT to create columns for each difficulty level.',
+  },
+  {
+    id: 'temporal-challenge',
+    title: 'Temporal Data Challenge',
+    description: 'Work with time-series data and date functions.',
+    difficulty: 'Intermediate',
+    category: 'Functions',
+    icon: <AccessTimeIcon sx={{ fontSize: 40 }} />,
+    problem: 'Find users who have been active for at least 3 consecutive days.',
+    expectedResult: 'WITH daily_activity AS (SELECT u.id, u.username, DATE(sq.created_at) as activity_date FROM users u INNER JOIN saved_queries sq ON u.id = sq.user_id GROUP BY u.id, u.username, DATE(sq.created_at)) SELECT DISTINCT da1.username FROM daily_activity da1 INNER JOIN daily_activity da2 ON da1.id = da2.id AND da2.activity_date = DATE_ADD(da1.activity_date, INTERVAL 1 DAY) INNER JOIN daily_activity da3 ON da1.id = da3.id AND da3.activity_date = DATE_ADD(da1.activity_date, INTERVAL 2 DAY);',
+    hint: 'Use self-joins with DATE_ADD to find consecutive days of activity.',
+  },
+  {
+    id: 'performance-challenge',
+    title: 'Query Performance Challenge',
+    description: 'Optimize a complex query for better performance.',
+    difficulty: 'Advanced',
+    category: 'Optimization',
+    icon: <SpeedIcon sx={{ fontSize: 40 }} />,
+    problem: 'Rewrite the following query to improve its performance: SELECT u.username, COUNT(sq.id) as query_count FROM users u LEFT JOIN saved_queries sq ON u.id = sq.user_id WHERE sq.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) GROUP BY u.id, u.username HAVING COUNT(sq.id) > 5;',
+    expectedResult: 'WITH recent_queries AS (SELECT user_id, COUNT(*) as query_count FROM saved_queries WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) GROUP BY user_id HAVING COUNT(*) > 5) SELECT u.username, rq.query_count FROM users u INNER JOIN recent_queries rq ON u.id = rq.user_id;',
+    hint: 'Use a CTE to filter and aggregate the data before joining with users.',
+  },
+  {
+    id: 'security-challenge',
+    title: 'Security Challenge',
+    description: 'Implement row-level security using views and functions.',
+    difficulty: 'Advanced',
+    category: 'Security',
+    icon: <SecurityIcon sx={{ fontSize: 40 }} />,
+    problem: 'Create a view that only shows users their own saved queries and the public queries of others.',
+    expectedResult: 'CREATE VIEW user_queries AS SELECT sq.* FROM saved_queries sq WHERE sq.user_id = CURRENT_USER() OR sq.is_public = 1;',
+    hint: 'Use CURRENT_USER() function to identify the current user and implement row-level filtering.',
+  },
+  {
+    id: 'json-challenge',
+    title: 'JSON Data Challenge',
+    description: 'Work with JSON data in SQL queries.',
+    difficulty: 'Intermediate',
+    category: 'Functions',
+    icon: <DataObjectIcon sx={{ fontSize: 40 }} />,
+    problem: 'Extract and aggregate data from a JSON column containing query metadata.',
+    expectedResult: 'SELECT u.username, COUNT(*) as total_queries, SUM(JSON_EXTRACT(sq.metadata, \'$.execution_time\')) as total_execution_time, AVG(JSON_EXTRACT(sq.metadata, \'$.complexity\')) as avg_complexity FROM users u INNER JOIN saved_queries sq ON u.id = sq.user_id WHERE JSON_EXTRACT(sq.metadata, \'$.status\') = \'success\' GROUP BY u.id, u.username;',
+    hint: 'Use JSON_EXTRACT to access specific fields within the JSON data.',
+  },
+  {
+    id: 'full-text-challenge',
+    title: 'Full-Text Search Challenge',
+    description: 'Implement efficient text search in queries.',
+    difficulty: 'Intermediate',
+    category: 'Functions',
+    icon: <SearchIcon sx={{ fontSize: 40 }} />,
+    problem: 'Find queries containing specific technical terms using full-text search.',
+    expectedResult: 'SELECT u.username, sq.title, MATCH(sq.query) AGAINST(\'JOIN GROUP BY HAVING\' IN BOOLEAN MODE) as relevance FROM users u INNER JOIN saved_queries sq ON u.id = sq.user_id WHERE MATCH(sq.query) AGAINST(\'JOIN GROUP BY HAVING\' IN BOOLEAN MODE) ORDER BY relevance DESC;',
+    hint: 'Use MATCH AGAINST with BOOLEAN MODE for flexible text search.',
+  },
+  {
+    id: 'partition-challenge',
+    title: 'Partitioning Challenge',
+    description: 'Optimize queries using table partitioning.',
+    difficulty: 'Advanced',
+    category: 'Optimization',
+    icon: <ViewModuleIcon sx={{ fontSize: 40 }} />,
+    problem: 'Create a partitioned table for query history and write a query that efficiently uses the partitions.',
+    expectedResult: 'CREATE TABLE query_history (id INT AUTO_INCREMENT, user_id INT, query TEXT, execution_time INT, created_at TIMESTAMP, PRIMARY KEY (id, created_at)) PARTITION BY RANGE (UNIX_TIMESTAMP(created_at)) (PARTITION p0 VALUES LESS THAN (UNIX_TIMESTAMP(\'2023-01-01\')), PARTITION p1 VALUES LESS THAN (UNIX_TIMESTAMP(\'2023-07-01\')), PARTITION p2 VALUES LESS THAN (UNIX_TIMESTAMP(\'2024-01-01\')), PARTITION p3 VALUES LESS THAN MAXVALUE); SELECT COUNT(*) as query_count, AVG(execution_time) as avg_time FROM query_history PARTITION (p2) WHERE user_id = 1;',
+    hint: 'Use RANGE partitioning based on timestamp and query specific partitions.',
+  },
+  {
+    id: 'materialized-view-challenge',
+    title: 'Materialized View Challenge',
+    description: 'Create and use materialized views for performance.',
+    difficulty: 'Advanced',
+    category: 'Optimization',
+    icon: <ViewQuiltIcon sx={{ fontSize: 40 }} />,
+    problem: 'Create a materialized view for frequently accessed query statistics.',
+    expectedResult: 'CREATE MATERIALIZED VIEW query_stats AS SELECT u.username, COUNT(sq.id) as total_queries, AVG(sq.execution_time) as avg_time, MAX(sq.created_at) as last_query FROM users u LEFT JOIN saved_queries sq ON u.id = sq.user_id GROUP BY u.id, u.username WITH DATA; REFRESH MATERIALIZED VIEW query_stats; SELECT * FROM query_stats WHERE total_queries > 10 ORDER BY avg_time DESC;',
+    hint: 'Use materialized views to pre-compute and store aggregated data.',
+  },
+  {
+    id: 'replication-challenge',
+    title: 'Replication Challenge',
+    description: 'Handle read-write operations in a replicated environment.',
+    difficulty: 'Advanced',
+    category: 'Optimization',
+    icon: <SyncIcon sx={{ fontSize: 40 }} />,
+    problem: 'Write queries that efficiently handle read-write operations in a master-slave replication setup.',
+    expectedResult: '-- Write operations (master) INSERT INTO saved_queries (user_id, title, query) VALUES (1, \'New Query\', \'SELECT * FROM users\'); -- Read operations (slave) SELECT u.username, COUNT(sq.id) as query_count FROM users u LEFT JOIN saved_queries sq ON u.id = sq.user_id GROUP BY u.id, u.username;',
+    hint: 'Separate read and write operations to different database instances.',
+  },
+  {
+    id: 'backup-challenge',
+    title: 'Backup and Recovery Challenge',
+    description: 'Implement point-in-time recovery strategy.',
+    difficulty: 'Advanced',
+    category: 'Security',
+    icon: <BackupIcon sx={{ fontSize: 40 }} />,
+    problem: 'Create a backup strategy and write queries to restore data to a specific point in time.',
+    expectedResult: '-- Backup creation mysqldump --single-transaction --master-data=2 --databases sql_playground > backup.sql -- Point-in-time recovery mysqlbinlog --start-datetime="2023-01-01 00:00:00" --stop-datetime="2023-01-02 00:00:00" mysql-bin.000001 | mysql -u root -p',
+    hint: 'Use binary logging and transaction consistency for point-in-time recovery.',
+  }
 ];
 
 const Challenges: React.FC = () => {
