@@ -13,22 +13,26 @@ import {
   sendEmailVerification
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBgJBK_ixbBUhLwuPKRMoXkCuUCscX-_Jg",
-  authDomain: "sql-playground-e2486.firebaseapp.com",
-  projectId: "sql-playground-e2486",
-  storageBucket: "sql-playground-e2486.firebasestorage.app",
-  messagingSenderId: "709069034921",
-  appId: "1:709069034921:web:190d4caca19621a91120b8"
-};
+import { firebaseConfig } from '../config/firebase.config';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { auth, db };
+export { 
+  auth, 
+  db, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged, 
+  updatePassword, 
+  EmailAuthProvider, 
+  reauthenticateWithCredential, 
+  sendPasswordResetEmail, 
+  sendEmailVerification 
+};
 
 export const registerUser = async (email: string, password: string) => {
   try {
