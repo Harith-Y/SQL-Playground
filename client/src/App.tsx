@@ -12,6 +12,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import Dashboard from './components/Dashboard';
+import Contribute from './components/Contribute';
 import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
 import { auth } from './services/firebase';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -241,6 +242,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Challenges />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/contribute"
+                  element={
+                    <ProtectedRoute>
+                      <Contribute />
                     </ProtectedRoute>
                   }
                 />

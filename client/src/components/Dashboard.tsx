@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { changePassword } from '../services/firebase';
 import AuthThemeToggle from './AuthThemeToggle';
 import SocialLinksNavbar from './SocialLinksNavbar';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -13,6 +14,7 @@ const Dashboard = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handlePasswordDialogOpen = () => {
     setOpenPasswordDialog(true);
@@ -142,6 +144,19 @@ const Dashboard = () => {
                 onClick={handlePasswordDialogOpen}
               >
                 • Change Password
+              </Typography>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  cursor: 'pointer',
+                  '&:hover': {
+                    color: 'primary.main',
+                    textDecoration: 'underline'
+                  }
+                }}
+                onClick={() => navigate('/contribute')}
+              >
+                • Contribute
               </Typography>
             </Paper>
           </Box>
