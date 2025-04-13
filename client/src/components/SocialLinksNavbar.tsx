@@ -4,9 +4,16 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import EmailIcon from '@mui/icons-material/Email';
+import LanguageIcon from '@mui/icons-material/Language';
 
 const SocialLinksNavbar = () => {
   const socialLinks = [
+    {
+      name: 'Portfolio',
+      icon: <LanguageIcon />,
+      url: 'https://portfolio-rho-ten-75.vercel.app/',
+      color: '#4CAF50'
+    },
     {
       name: 'GitHub',
       icon: <GitHubIcon />,
