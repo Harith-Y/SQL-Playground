@@ -27,7 +27,7 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
    - Click the "Fork" button on the top right of the repository page
    - Clone your forked repository:
      ```bash
-     git clone https://github.com/your-username/SQL-Playground.git
+     git clone https://github.com/Harith-Y/SQL-Playground.git
      cd SQL-Playground
      ```
 
