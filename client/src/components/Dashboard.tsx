@@ -3,6 +3,7 @@ import { Box, Typography, Paper, Container, Avatar, Dialog, DialogTitle, DialogC
 import { useAuth } from '../contexts/AuthContext';
 import { changePassword } from '../services/firebase';
 import AuthThemeToggle from './AuthThemeToggle';
+import SocialLinksNavbar from './SocialLinksNavbar';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -57,6 +58,7 @@ const Dashboard = () => {
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         py: 4,
+        pb: 10,
       }}
     >
       <AuthThemeToggle />
@@ -184,6 +186,8 @@ const Dashboard = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <SocialLinksNavbar />
     </Box>
   );
 };
