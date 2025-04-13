@@ -121,6 +121,22 @@ FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
 FIREBASE_APP_ID=your_app_id
 ```
 
+For the client application, create a `.env` file in the `client` directory with the following variables:
+```env
+# Firebase Configuration
+REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+REACT_APP_FIREBASE_PROJECT_ID=your_firebase_project_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+REACT_APP_FIREBASE_APP_ID=your_firebase_app_id
+
+# API Configuration
+# For development: http://localhost:5000
+# For production: your_vercel_deployment_url
+REACT_APP_API_BASE_URL=your_api_base_url
+```
+
 5. Start the development servers
 ```bash
 # Start both frontend and backend concurrently
