@@ -1,10 +1,16 @@
-# SQL Playground
+# SQL Playground 🚀
 
-A modern, interactive SQL learning and practice environment built with React, TypeScript, and Firebase.
+[![React](https://img.shields.io/badge/React-18.2.0-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue.svg)](https://www.typescriptlang.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-11.6.0-orange.svg)](https://firebase.google.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
+A modern, interactive SQL learning and practice environment built with React, TypeScript, and Firebase. SQL Playground provides a comprehensive platform for learning, practicing, and mastering SQL through an intuitive interface and real-time feedback.
 
 ![SQL Playground Screenshot](client/public/logo512.png)
 
-## Features
+## ✨ Features
 
 ### Core Features
 - **Interactive SQL Editor**
@@ -51,20 +57,7 @@ A modern, interactive SQL learning and practice environment built with React, Ty
   - Password reset functionality
   - Account management
 
-### Advanced Features
-- **Query Visualization**
-  - Visual representation of query execution
-  - Performance analysis
-  - Query optimization suggestions
-  - Execution plan visualization
-
-- **Data Import/Export**
-  - CSV/JSON data import
-  - Query result export
-  - Schema migration tools
-  - Backup and restore functionality
-
-## Tech Stack
+## 🛠️ Tech Stack
 
 ### Frontend
 - **Framework**: React.js with TypeScript
@@ -85,14 +78,7 @@ A modern, interactive SQL learning and practice environment built with React, Ty
 - **Security**: bcryptjs for password hashing
 - **CORS**: Enabled for cross-origin requests
 
-### Development Tools
-- **Package Manager**: npm
-- **Development Server**: Concurrent execution of frontend and backend
-- **Environment Management**: dotenv
-- **Code Quality**: ESLint
-- **Testing**: React Testing Library, Jest
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v14 or higher)
@@ -110,6 +96,10 @@ cd SQL-Playground
 
 2. Install dependencies
 ```bash
+# Install root dependencies
+npm install
+
+# Install client dependencies
 cd client
 npm install
 ```
@@ -119,26 +109,58 @@ npm install
 - Enable Authentication and Firestore
 - Add your Firebase configuration to `client/src/services/firebase.ts`
 
-4. Start the development server
-```bash
-npm start
+4. Configure Environment Variables
+Create a `.env` file in the root directory with the following variables:
+```env
+PORT=3001
+FIREBASE_API_KEY=your_api_key
+FIREBASE_AUTH_DOMAIN=your_auth_domain
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_storage_bucket
+FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+FIREBASE_APP_ID=your_app_id
 ```
 
-## Project Structure
+5. Start the development servers
+```bash
+# Start both frontend and backend concurrently
+npm run dev:full
+
+# Or start them separately
+npm run dev        # Backend server
+npm run client     # Frontend server
+```
+
+## 📁 Project Structure
 
 ```
 sql-playground/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/    # React components
-│   │   ├── contexts/      # Theme contet
+│   │   ├── contexts/      # Theme context
 │   │   ├── services/      # Backend Services
-│   │   └── types/        # TypeScript type definitions
+│   │   └── types/         # TypeScript type definitions
 ├── server/                # Node.js backend
 │   ├── routes/           # API routes
 │   └── config/           # Database configuration
-├── database/            # SQLite database files
+├── database/             # SQLite database files
+└── .env                  # Environment variables
 ```
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/logout` - Logout user
+- `POST /api/auth/reset-password` - Reset password
+
+### Query Endpoints
+- `POST /api/queries/execute` - Execute SQL query
+- `GET /api/queries/history` - Get query history
+- `POST /api/queries/save` - Save a query
+- `DELETE /api/queries/:id` - Delete a saved query
 
 ## Development Scripts
 
@@ -147,7 +169,7 @@ sql-playground/
 - `npm run client` - Start the frontend development server
 - `npm run dev:full` - Start both frontend and backend concurrently
 
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -155,34 +177,22 @@ sql-playground/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests. Our project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
-This project, **SQL Playground**, was created by **Harith Yerragolam**.
-<br><br>
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, subject to the following conditions:
-<br>
-<ul style="list-style-type:none;">
-  <li>The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.</li>
-</ul>
-<br>
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+## 📝 License
 
+This project is licensed - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - [Monaco Editor](https://microsoft.github.io/monaco-editor/)
 - [Material-UI](https://mui.com/)
 - [Firebase](https://firebase.google.com/)
 - [React](https://reactjs.org/)
+- [D3.js](https://d3js.org/)
+- [Framer Motion](https://www.framer.com/motion/)
 
-## Contact
+## 📞 Contact
 
 Harith Yerragolam - [@harith-yerragolam](https://www.linkedin.com/in/harith-yerragolam-617486288/)
 
