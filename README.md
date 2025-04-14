@@ -56,6 +56,11 @@ A modern, interactive SQL learning and practice environment built with React, Ty
   - Email/password login
   - Password reset functionality
   - Account management
+  - Email verification requirement
+    - Users must verify their email before accessing protected routes
+    - Verification email sent upon registration
+    - Option to resend verification email
+    - Automatic redirection to verification page for unverified users
 
 ## 🛠️ Tech Stack
 
