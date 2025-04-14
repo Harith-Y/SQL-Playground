@@ -19,6 +19,7 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { AuthThemeProvider } from './contexts/AuthThemeContext';
 import { useAuth } from './contexts/AuthContext';
+import EmailVerification from './components/EmailVerification';
 
 // Default schema
 const defaultSchema: SchemaDefinition = {
@@ -50,6 +51,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!currentUser) {
     return <Navigate to="/login" />;
+  }
+
+  if (!currentUser.emailVerified) {
+    return <EmailVerification />;
   }
 
   return <>{children}</>;

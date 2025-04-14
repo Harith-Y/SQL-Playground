@@ -50,7 +50,14 @@ export const registerUser = async (email: string, password: string) => {
 export const loginUser = async (email: string, password: string) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    const user = userCredential.user;
+    
+    if (!user.emailVerified) {
+      await signOut(auth);
+      throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
+    }
+    
+    return user;
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Login failed');
   }
