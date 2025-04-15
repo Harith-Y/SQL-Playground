@@ -46,8 +46,12 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
     }));
   };
 
-  const handleExport = () => {
-    exportState(schema, queries);
+  const handleExport = async () => {
+    try {
+      await exportState(schema, queries);
+    } catch (error) {
+      console.error('Error exporting schema:', error);
+    }
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {

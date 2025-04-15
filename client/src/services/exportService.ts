@@ -8,6 +8,7 @@ export interface SchemaDefinition {
         type: string;
         constraints: string;
       }>;
+      data?: any[]; // Add data field to store table contents
     };
   };
 }
@@ -21,9 +22,27 @@ export interface SavedState {
   }>;
 }
 
-export const exportState = (schema: SchemaDefinition, queries: Array<{ title: string; query: string; result?: QueryResult }>) => {
+export const exportState = async (schema: SchemaDefinition, queries: Array<{ title: string; query: string; result?: QueryResult }>) => {
+  // Fetch data for each table
+  const tablesWithData = { ...schema.tables };
+  for (const [tableName, table] of Object.entries(schema.tables)) {
+    try {
+      const result = await executeQuery(`SELECT * FROM ${tableName}`);
+      if (result.success && result.results) {
+        tablesWithData[tableName] = {
+          ...table,
+          data: result.results
+        };
+      }
+    } catch (error) {
+      console.error(`Error fetching data for table ${tableName}:`, error);
+    }
+  }
+
   const state: SavedState = {
-    schema,
+    schema: {
+      tables: tablesWithData
+    },
     queries,
   };
   
