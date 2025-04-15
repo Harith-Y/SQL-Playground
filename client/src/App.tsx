@@ -124,7 +124,12 @@ const Playground = () => {
   };
 
   const handleSchemaLoad = (newSchema: SchemaDefinition) => {
-    setSchema(newSchema);
+    setSchema(prevSchema => ({
+      tables: {
+        ...prevSchema.tables,
+        ...newSchema.tables
+      }
+    }));
   };
 
   return (
