@@ -85,6 +85,24 @@ router.post('/create', async (req, res) => {
           else resolve(null);
         });
       });
+
+      // Insert data if available
+      if (table.data && table.data.length > 0) {
+        const columnNames = table.columns.map(col => col.name).join(', ');
+        const placeholders = table.columns.map(() => '?').join(', ');
+        
+        for (const row of table.data) {
+          const values = table.columns.map(col => row[col.name]);
+          const insertQuery = `INSERT INTO ${tableName} (${columnNames}) VALUES (${placeholders})`;
+          
+          await new Promise((resolve, reject) => {
+            db.run(insertQuery, values, (err) => {
+              if (err) reject(err);
+              else resolve(null);
+            });
+          });
+        }
+      }
     }
 
     res.json({ success: true });

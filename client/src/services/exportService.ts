@@ -1,4 +1,4 @@
-import { QueryResult } from './api';
+import { QueryResult, executeQuery } from './api';
 
 export interface SchemaDefinition {
   tables: {
