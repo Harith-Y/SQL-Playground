@@ -123,6 +123,10 @@ const Playground = () => {
     setSavedQueries(queries);
   };
 
+  const handleSchemaLoad = (newSchema: SchemaDefinition) => {
+    setSchema(newSchema);
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -161,6 +165,7 @@ const Playground = () => {
             schema={schema}
             queries={savedQueries}
             onQueriesLoad={handleQueriesLoad}
+            onSchemaLoad={handleSchemaLoad}
           />
         </Box>
       </Box>
