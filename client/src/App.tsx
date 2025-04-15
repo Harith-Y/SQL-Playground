@@ -15,7 +15,7 @@ import ForgotPassword from './components/ForgotPassword';
 import Dashboard from './components/Dashboard';
 import Contribute from './components/Contribute';
 
-import { executeQuery, QueryResult, fetchSchema, SchemaDefinition } from './services/api';
+import { executeQuery, QueryResult, fetchSchema, SchemaDefinition, createTablesFromSchema } from './services/api';
 import { auth } from './services/firebase';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -123,13 +123,25 @@ const Playground = () => {
     setSavedQueries(queries);
   };
 
-  const handleSchemaLoad = (newSchema: SchemaDefinition) => {
-    setSchema(prevSchema => ({
-      tables: {
-        ...prevSchema.tables,
-        ...newSchema.tables
+  const handleSchemaLoad = async (newSchema: SchemaDefinition) => {
+    try {
+      // First create the tables in the database
+      const result = await createTablesFromSchema(newSchema);
+      if (!result.success) {
+        setError(result.error || 'Failed to create tables from imported schema');
+        return;
       }
-    }));
+      
+      // Then update the UI schema
+      setSchema(prevSchema => ({
+        tables: {
+          ...prevSchema.tables,
+          ...newSchema.tables
+        }
+      }));
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to import schema');
+    }
   };
 
   return (

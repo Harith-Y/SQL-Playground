@@ -62,3 +62,23 @@ export const fetchSchema = async (): Promise<SchemaDefinition> => {
     throw error;
   }
 };
+
+export const createTablesFromSchema = async (schema: SchemaDefinition): Promise<QueryResult> => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('User must be logged in to create tables');
+  }
+
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/schema/create`, {
+      schema,
+      userId: user.uid
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.error || 'Failed to create tables');
+    }
+    throw error;
+  }
+};

@@ -57,4 +57,44 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.post('/create', async (req, res) => {
+  const { schema, userId } = req.body;
+  
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  if (!schema || !schema.tables) {
+    return res.status(400).json({ error: 'Invalid schema format' });
+  }
+
+  try {
+    const db = getUserDatabase(userId);
+    
+    // Create each table from the schema
+    for (const [tableName, table] of Object.entries(schema.tables)) {
+      const columns = table.columns.map(col => {
+        return `${col.name} ${col.type} ${col.constraints}`;
+      }).join(', ');
+
+      const createTableQuery = `CREATE TABLE IF NOT EXISTS ${tableName} (${columns})`;
+      
+      await new Promise((resolve, reject) => {
+        db.run(createTableQuery, (err) => {
+          if (err) reject(err);
+          else resolve(null);
+        });
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error creating tables:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
 module.exports = router;
