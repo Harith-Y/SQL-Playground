@@ -54,7 +54,10 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
     const file = event.target.files?.[0];
     if (file) {
       try {
+        console.log('Importing file:', file.name);
         const { schema: importedSchema, queries: importedQueries } = await importState(file);
+        console.log('Imported schema:', importedSchema);
+        console.log('Imported queries:', importedQueries);
         onSchemaLoad?.(importedSchema);
         onQueriesLoad?.(importedQueries);
       } catch (error) {

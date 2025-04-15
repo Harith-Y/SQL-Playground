@@ -44,9 +44,30 @@ export const importState = (file: File): Promise<SavedState> => {
     reader.onload = (event) => {
       try {
         const state = JSON.parse(event.target?.result as string) as SavedState;
+        
+        // Validate the imported state
+        if (!state.schema || !state.schema.tables) {
+          throw new Error('Invalid schema format in imported file');
+        }
+        
+        // Validate each table's structure
+        Object.entries(state.schema.tables).forEach(([tableName, table]) => {
+          if (!table.columns || !Array.isArray(table.columns)) {
+            throw new Error(`Invalid table format for table ${tableName}`);
+          }
+          
+          table.columns.forEach(column => {
+            if (!column.name || !column.type) {
+              throw new Error(`Invalid column format in table ${tableName}`);
+            }
+          });
+        });
+        
+        console.log('Successfully validated imported state:', state);
         resolve(state);
       } catch (error) {
-        reject(new Error('Invalid file format'));
+        console.error('Import validation error:', error);
+        reject(error instanceof Error ? error : new Error('Invalid file format'));
       }
     };
     reader.onerror = () => reject(new Error('Error reading file'));
