@@ -64,9 +64,9 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
   };
 
   // Filter out system tables
-  const userTables = Object.entries(schema.tables).filter(
+  const userTables = schema?.tables ? Object.entries(schema.tables).filter(
     ([tableName]) => !SYSTEM_TABLES.includes(tableName)
-  );
+  ) : [];
 
   return (
     <Paper
