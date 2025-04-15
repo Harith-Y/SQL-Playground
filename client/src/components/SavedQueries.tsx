@@ -86,8 +86,16 @@ const SavedQueries: React.FC<SavedQueriesProps> = ({ open, onClose, onSelectQuer
   };
 
   const handleDeleteQuery = async (id: number) => {
+    const user = auth.currentUser;
+    if (!user) {
+      setError('User must be logged in');
+      return;
+    }
+
     try {
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/saved-queries/${id}`);
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/saved-queries/${id}`, {
+        params: { userId: user.uid }
+      });
       fetchQueries();
     } catch (err) {
       setError('Failed to delete query');
