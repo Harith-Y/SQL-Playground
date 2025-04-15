@@ -63,10 +63,8 @@ export const importState = (file: File): Promise<SavedState> => {
           });
         });
         
-        console.log('Successfully validated imported state:', state);
         resolve(state);
       } catch (error) {
-        console.error('Import validation error:', error);
         reject(error instanceof Error ? error : new Error('Invalid file format'));
       }
     };

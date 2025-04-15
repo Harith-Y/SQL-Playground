@@ -124,18 +124,12 @@ const Playground = () => {
   };
 
   const handleSchemaLoad = (newSchema: SchemaDefinition) => {
-    console.log('Current schema before update:', schema);
-    console.log('New schema to merge:', newSchema);
-    setSchema(prevSchema => {
-      const mergedSchema = {
-        tables: {
-          ...prevSchema.tables,
-          ...newSchema.tables
-        }
-      };
-      console.log('Merged schema:', mergedSchema);
-      return mergedSchema;
-    });
+    setSchema(prevSchema => ({
+      tables: {
+        ...prevSchema.tables,
+        ...newSchema.tables
+      }
+    }));
   };
 
   return (
