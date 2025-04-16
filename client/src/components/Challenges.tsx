@@ -278,12 +278,14 @@ const Challenges: React.FC = () => {
   const [queryResult, setQueryResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
+  const [incorrectAttempts, setIncorrectAttempts] = useState(0);
 
   const handleChallengeSelect = (challenge: Challenge) => {
     setSelectedChallenge(challenge);
     setCurrentQuery('');
     setQueryResult(null);
     setShowSolution(false);
+    setIncorrectAttempts(0);
   };
 
   const handleExecuteQuery = async () => {
@@ -298,8 +300,14 @@ const Challenges: React.FC = () => {
           { username: 'jane_smith', email: 'jane@example.com', query_count: 2 },
         ],
       });
+
+      // Check if the query matches the expected result
+      if (currentQuery.trim().toLowerCase() !== selectedChallenge?.expectedResult.trim().toLowerCase()) {
+        setIncorrectAttempts(prev => prev + 1);
+      }
     } catch (err) {
       // Handle errors appropriately
+      setIncorrectAttempts(prev => prev + 1);
     } finally {
       setIsLoading(false);
     }
@@ -401,9 +409,10 @@ const Challenges: React.FC = () => {
               variant="outlined"
               color="primary"
               onClick={() => setShowSolution(!showSolution)}
+              disabled={incorrectAttempts < 3}
               sx={{ mr: 2 }}
             >
-              {showSolution ? 'Hide Solution' : 'Show Solution'}
+              {showSolution ? 'Hide Solution' : `Show Solution (${3 - incorrectAttempts} attempts remaining)`}
             </Button>
           </Box>
 
