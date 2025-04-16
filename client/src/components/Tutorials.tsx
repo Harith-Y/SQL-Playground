@@ -200,6 +200,27 @@ const tutorials: Tutorial[] = [
     description: 'Understand different replication strategies for high availability and read scaling.',
     icon: <SyncIcon sx={{ fontSize: 40 }} />,
     difficulty: 'Advanced',
+  },
+  {
+    id: 'advanced-joins',
+    title: 'Advanced SQL Joins',
+    description: 'Master complex join operations including self-joins, cross joins, and hierarchical data structures.',
+    icon: <DataObjectIcon sx={{ fontSize: 40 }} />,
+    difficulty: 'Advanced',
+  },
+  {
+    id: 'advanced-aggregation',
+    title: 'Advanced Aggregation',
+    description: 'Learn advanced aggregation techniques including pivot tables, ROLLUP, CUBE, and GROUPING SETS.',
+    icon: <FunctionsIcon sx={{ fontSize: 40 }} />,
+    difficulty: 'Advanced',
+  },
+  {
+    id: 'data-analysis',
+    title: 'Data Analysis with SQL',
+    description: 'Master time series analysis, customer analytics, and business intelligence using SQL.',
+    icon: <TimelineIcon sx={{ fontSize: 40 }} />,
+    difficulty: 'Advanced',
   }
 ];
 
