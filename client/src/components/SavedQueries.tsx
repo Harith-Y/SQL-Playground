@@ -107,6 +107,10 @@ const SavedQueries: React.FC<SavedQueriesProps> = ({ open, onClose, onSelectQuer
     navigator.clipboard.writeText(query);
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
+  };
+
   return (
     <Dialog
       open={open}
@@ -162,7 +166,20 @@ const SavedQueries: React.FC<SavedQueriesProps> = ({ open, onClose, onSelectQuer
                 }
               >
                 <ListItemText
-                  primary={item.title}
+                  primary={
+                    <Box>
+                      <Typography variant="subtitle1" component="span">
+                        {item.title}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ ml: 1 }}
+                      >
+                        Saved: {formatDate(item.created_at)}
+                      </Typography>
+                    </Box>
+                  }
                   secondary={
                     <Typography
                       component="pre"
