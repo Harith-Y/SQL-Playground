@@ -3,6 +3,7 @@ import { Box, Typography, Paper, Container, Button, List, ListItem, ListItemText
 import GitHubIcon from '@mui/icons-material/GitHub';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useNavigate } from 'react-router-dom';
+import SocialLinksNavbar from './SocialLinksNavbar';
 
 const Contribute = () => {
   const navigate = useNavigate();
@@ -171,6 +172,7 @@ const Contribute = () => {
           </Box>
         </Paper>
       </Container>
+      <SocialLinksNavbar />
     </Box>
   );
 };

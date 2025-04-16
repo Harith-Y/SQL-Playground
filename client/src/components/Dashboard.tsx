@@ -3,7 +3,6 @@ import { Box, Typography, Paper, Container, Avatar, Dialog, DialogTitle, DialogC
 import { useAuth } from '../contexts/AuthContext';
 import { changePassword } from '../services/firebase';
 import AuthThemeToggle from './AuthThemeToggle';
-import SocialLinksNavbar from './SocialLinksNavbar';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -201,8 +200,6 @@ const Dashboard = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <SocialLinksNavbar />
     </Box>
   );
 };
