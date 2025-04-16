@@ -22,7 +22,11 @@ export interface SavedState {
   }>;
 }
 
-export const exportState = async (schema: SchemaDefinition, queries: Array<{ title: string; query: string; result?: QueryResult }>) => {
+export const exportState = async (
+  schema: SchemaDefinition, 
+  queries: Array<{ title: string; query: string; result?: QueryResult }>,
+  filename: string = 'sql-playground-state'
+) => {
   // Fetch data for each table
   const tablesWithData = { ...schema.tables };
   for (const [tableName, table] of Object.entries(schema.tables)) {
@@ -50,7 +54,7 @@ export const exportState = async (schema: SchemaDefinition, queries: Array<{ tit
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'sql-playground-state.json';
+  a.download = `${filename}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

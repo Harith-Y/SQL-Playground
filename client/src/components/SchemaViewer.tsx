@@ -10,6 +10,11 @@ import {
   Collapse,
   Button,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import {
   TableChart as TableIcon,
@@ -38,6 +43,8 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
 }) => {
   const { currentTheme } = useTheme();
   const [expandedTables, setExpandedTables] = React.useState<Record<string, boolean>>({});
+  const [exportDialogOpen, setExportDialogOpen] = React.useState(false);
+  const [exportFilename, setExportFilename] = React.useState('schema_export');
 
   const handleTableClick = (tableName: string) => {
     setExpandedTables(prev => ({
@@ -48,10 +55,15 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
 
   const handleExport = async () => {
     try {
-      await exportState(schema, queries);
+      await exportState(schema, queries, exportFilename);
+      setExportDialogOpen(false);
     } catch (error) {
       console.error('Error exporting schema:', error);
     }
+  };
+
+  const handleExportClick = () => {
+    setExportDialogOpen(true);
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +103,7 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
             variant="outlined"
             size="small"
             startIcon={<SaveIcon />}
-            onClick={handleExport}
+            onClick={handleExportClick}
             sx={{ color: currentTheme.colors.text }}
           >
             Export
@@ -208,6 +220,27 @@ const SchemaViewer: React.FC<SchemaViewerProps> = ({
           </Box>
         )}
       </Box>
+
+      <Dialog open={exportDialogOpen} onClose={() => setExportDialogOpen(false)}>
+        <DialogTitle>Export Schema</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Filename"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={exportFilename}
+            onChange={(e) => setExportFilename(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setExportDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleExport} variant="contained">Export</Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };
