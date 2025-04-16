@@ -268,6 +268,258 @@ const challenges: Challenge[] = [
     problem: 'Create a backup strategy and write queries to restore data to a specific point in time.',
     expectedResult: '-- Backup creation mysqldump --single-transaction --master-data=2 --databases sql_playground > backup.sql -- Point-in-time recovery mysqlbinlog --start-datetime="2023-01-01 00:00:00" --stop-datetime="2023-01-02 00:00:00" mysql-bin.000001 | mysql -u root -p',
     hint: 'Use binary logging and transaction consistency for point-in-time recovery.',
+  },
+  {
+    id: 'advanced-json-challenge',
+    title: 'Advanced JSON Manipulation',
+    description: 'Work with complex JSON data structures and nested queries.',
+    difficulty: 'Advanced',
+    category: 'Functions',
+    icon: <DataObjectIcon sx={{ fontSize: 40 }} />,
+    problem: 'Given a table with JSON data containing user preferences and activity logs, find users who have changed their notification settings more than 3 times in the last month and have specific activity patterns.',
+    expectedResult: `WITH user_preferences AS (
+  SELECT 
+    user_id,
+    JSON_EXTRACT(preferences, '$.notifications') as notification_settings,
+    created_at
+  FROM user_settings
+  WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)
+),
+notification_changes AS (
+  SELECT 
+    user_id,
+    COUNT(*) as change_count
+  FROM user_preferences
+  GROUP BY user_id
+  HAVING COUNT(*) > 3
+),
+user_activity AS (
+  SELECT 
+    user_id,
+    JSON_EXTRACT(activity_log, '$.type') as activity_type,
+    COUNT(*) as activity_count
+  FROM user_activities
+  WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)
+  GROUP BY user_id, JSON_EXTRACT(activity_log, '$.type')
+)
+SELECT 
+  u.username,
+  nc.change_count as notification_changes,
+  GROUP_CONCAT(CONCAT(ua.activity_type, ':', ua.activity_count)) as activity_pattern
+FROM users u
+JOIN notification_changes nc ON u.id = nc.user_id
+JOIN user_activity ua ON u.id = ua.user_id
+GROUP BY u.id, u.username, nc.change_count
+HAVING COUNT(DISTINCT ua.activity_type) >= 3;`,
+    hint: 'Use JSON_EXTRACT to access nested JSON data and combine it with window functions for pattern analysis.'
+  },
+  {
+    id: 'recursive-hierarchy-challenge',
+    title: 'Recursive Hierarchy Analysis',
+    description: 'Analyze multi-level organizational hierarchies using recursive CTEs.',
+    difficulty: 'Advanced',
+    category: 'CTEs',
+    icon: <TimelineIcon sx={{ fontSize: 40 }} />,
+    problem: 'Given an organizational structure with employees and their managers, find all employees who are at least 3 levels deep in the hierarchy and have more subordinates than their manager.',
+    expectedResult: `WITH RECURSIVE org_hierarchy AS (
+  -- Base case: Get all employees
+  SELECT 
+    id,
+    name,
+    manager_id,
+    1 as level,
+    CAST(name AS CHAR(1000)) as path
+  FROM employees
+  WHERE manager_id IS NULL
+  
+  UNION ALL
+  
+  -- Recursive case: Get subordinates
+  SELECT 
+    e.id,
+    e.name,
+    e.manager_id,
+    oh.level + 1,
+    CONCAT(oh.path, ' > ', e.name)
+  FROM employees e
+  JOIN org_hierarchy oh ON e.manager_id = oh.id
+),
+subordinate_counts AS (
+  SELECT 
+    manager_id,
+    COUNT(*) as subordinate_count
+  FROM employees
+  GROUP BY manager_id
+)
+SELECT 
+  oh.id,
+  oh.name,
+  oh.level,
+  oh.path,
+  sc.subordinate_count,
+  msc.subordinate_count as manager_subordinate_count
+FROM org_hierarchy oh
+JOIN subordinate_counts sc ON oh.id = sc.manager_id
+JOIN employees e ON oh.manager_id = e.id
+JOIN subordinate_counts msc ON e.id = msc.manager_id
+WHERE oh.level >= 3
+AND sc.subordinate_count > msc.subordinate_count
+ORDER BY oh.level DESC, sc.subordinate_count DESC;`,
+    hint: 'Use a recursive CTE to build the hierarchy and calculate subordinate counts at each level.'
+  },
+  {
+    id: 'temporal-analysis-challenge',
+    title: 'Temporal Data Analysis',
+    description: 'Analyze time-series data with complex temporal patterns.',
+    difficulty: 'Advanced',
+    category: 'Functions',
+    icon: <AccessTimeIcon sx={{ fontSize: 40 }} />,
+    problem: 'Find users who have shown a specific pattern of activity: at least 3 consecutive days of increasing activity, followed by a day of decreased activity, and then a return to the previous level.',
+    expectedResult: `WITH daily_activity AS (
+  SELECT 
+    user_id,
+    DATE(activity_time) as activity_date,
+    COUNT(*) as activity_count
+  FROM user_activities
+  GROUP BY user_id, DATE(activity_time)
+),
+activity_patterns AS (
+  SELECT 
+    user_id,
+    activity_date,
+    activity_count,
+    LAG(activity_count, 1) OVER (PARTITION BY user_id ORDER BY activity_date) as prev_count,
+    LAG(activity_count, 2) OVER (PARTITION BY user_id ORDER BY activity_date) as prev_prev_count,
+    LAG(activity_count, 3) OVER (PARTITION BY user_id ORDER BY activity_date) as prev_prev_prev_count,
+    LEAD(activity_count, 1) OVER (PARTITION BY user_id ORDER BY activity_date) as next_count
+  FROM daily_activity
+)
+SELECT DISTINCT
+  u.username,
+  ap.activity_date as pattern_date,
+  ap.activity_count,
+  ap.prev_count,
+  ap.prev_prev_count,
+  ap.prev_prev_prev_count,
+  ap.next_count
+FROM activity_patterns ap
+JOIN users u ON ap.user_id = u.id
+WHERE 
+  -- Three consecutive days of increasing activity
+  ap.prev_prev_prev_count < ap.prev_prev_count 
+  AND ap.prev_prev_count < ap.prev_count
+  AND ap.prev_count < ap.activity_count
+  -- Followed by a decrease
+  AND ap.activity_count > ap.next_count
+  -- And then a return to previous level
+  AND ap.next_count >= ap.prev_count;`,
+    hint: 'Use window functions to compare activity levels across consecutive days.'
+  },
+  {
+    id: 'advanced-window-challenge',
+    title: 'Advanced Window Functions',
+    description: 'Master complex window function patterns and analytics.',
+    difficulty: 'Advanced',
+    category: 'Window Functions',
+    icon: <FunctionsIcon sx={{ fontSize: 40 }} />,
+    problem: 'For each user, calculate their activity percentile within their user group, and find users who are consistently in the top 10% of activity for at least 3 consecutive months.',
+    expectedResult: `WITH monthly_activity AS (
+  SELECT 
+    user_id,
+    DATE_FORMAT(activity_date, '%Y-%m') as month,
+    COUNT(*) as activity_count
+  FROM user_activities
+  GROUP BY user_id, DATE_FORMAT(activity_date, '%Y-%m')
+),
+activity_percentiles AS (
+  SELECT 
+    user_id,
+    month,
+    activity_count,
+    PERCENT_RANK() OVER (
+      PARTITION BY month 
+      ORDER BY activity_count
+    ) * 100 as percentile
+  FROM monthly_activity
+),
+consecutive_months AS (
+  SELECT 
+    user_id,
+    month,
+    percentile,
+    LAG(month, 1) OVER (PARTITION BY user_id ORDER BY month) as prev_month,
+    LAG(month, 2) OVER (PARTITION BY user_id ORDER BY month) as prev_prev_month
+  FROM activity_percentiles
+  WHERE percentile >= 90
+)
+SELECT DISTINCT
+  u.username,
+  cm.month,
+  cm.percentile,
+  ma.activity_count
+FROM consecutive_months cm
+JOIN users u ON cm.user_id = u.id
+JOIN monthly_activity ma ON cm.user_id = ma.user_id AND cm.month = ma.month
+WHERE 
+  cm.prev_month IS NOT NULL 
+  AND cm.prev_prev_month IS NOT NULL
+  AND DATEDIFF(
+    STR_TO_DATE(CONCAT(cm.month, '-01'), '%Y-%m-%d'),
+    STR_TO_DATE(CONCAT(cm.prev_month, '-01'), '%Y-%m-%d')
+  ) = 30
+  AND DATEDIFF(
+    STR_TO_DATE(CONCAT(cm.prev_month, '-01'), '%Y-%m-%d'),
+    STR_TO_DATE(CONCAT(cm.prev_prev_month, '-01'), '%Y-%m-%d')
+  ) = 30
+ORDER BY cm.month DESC, cm.percentile DESC;`,
+    hint: 'Use PERCENT_RANK() for percentile calculation and window functions to check consecutive months.'
+  },
+  {
+    id: 'optimization-challenge',
+    title: 'Query Optimization Challenge',
+    description: 'Optimize a complex query for better performance.',
+    difficulty: 'Advanced',
+    category: 'Optimization',
+    icon: <SpeedIcon sx={{ fontSize: 40 }} />,
+    problem: 'Given a slow-running query that joins multiple large tables with complex conditions, optimize it for better performance while maintaining the same results.',
+    expectedResult: `-- Original slow query
+SELECT 
+  u.username,
+  COUNT(DISTINCT sq.id) as query_count,
+  AVG(qh.execution_time) as avg_execution_time,
+  MAX(qh.created_at) as last_query_time
+FROM users u
+LEFT JOIN saved_queries sq ON u.id = sq.user_id
+LEFT JOIN query_history qh ON sq.id = qh.query_id
+WHERE qh.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+GROUP BY u.id, u.username
+HAVING COUNT(DISTINCT sq.id) > 5;
+
+-- Optimized query
+WITH recent_queries AS (
+  SELECT 
+    query_id,
+    execution_time,
+    created_at
+  FROM query_history
+  WHERE created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+),
+user_query_stats AS (
+  SELECT 
+    u.id,
+    u.username,
+    COUNT(DISTINCT sq.id) as query_count,
+    AVG(rq.execution_time) as avg_execution_time,
+    MAX(rq.created_at) as last_query_time
+  FROM users u
+  INNER JOIN saved_queries sq ON u.id = sq.user_id
+  INNER JOIN recent_queries rq ON sq.id = rq.query_id
+  GROUP BY u.id, u.username
+  HAVING COUNT(DISTINCT sq.id) > 5
+)
+SELECT * FROM user_query_stats
+ORDER BY query_count DESC, avg_execution_time ASC;`,
+    hint: 'Use CTEs to break down the query into smaller, more efficient parts and optimize join conditions.'
   }
 ];
 

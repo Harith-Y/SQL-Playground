@@ -474,6 +474,421 @@ const lessons: Record<string, Lesson[]> = {
       expectedResult: 'STOP SLAVE; RESET SLAVE ALL; CHANGE MASTER TO MASTER_HOST="master.example.com", MASTER_USER="repl_user", MASTER_PASSWORD="repl_password", MASTER_AUTO_POSITION=1, MASTER_RETRY_COUNT=10, MASTER_CONNECT_RETRY=60; START SLAVE;',
       hint: 'Use MASTER_RETRY_COUNT and MASTER_CONNECT_RETRY to handle network issues.',
     }
+  ],
+  'advanced-joins': [
+    {
+      id: 'self-joins',
+      title: 'Self Joins and Hierarchical Data',
+      content: 'Learn how to use self-joins to work with hierarchical data structures like organizational charts, category trees, and threaded comments.',
+      exampleQuery: `WITH RECURSIVE category_tree AS (
+  SELECT id, name, parent_id, 1 as level
+  FROM categories
+  WHERE parent_id IS NULL
+  
+  UNION ALL
+  
+  SELECT c.id, c.name, c.parent_id, ct.level + 1
+  FROM categories c
+  JOIN category_tree ct ON c.parent_id = ct.id
+)
+SELECT 
+  c1.name as parent_category,
+  c2.name as child_category,
+  c2.level
+FROM category_tree c1
+JOIN category_tree c2 ON c1.id = c2.parent_id
+ORDER BY c1.name, c2.name;`,
+      exerciseQuery: `WITH RECURSIVE comment_thread AS (
+  SELECT id, content, parent_id, 1 as level
+  FROM comments
+  WHERE parent_id IS NULL
+  
+  UNION ALL
+  
+  SELECT c.id, c.content, c.parent_id, ct.level + 1
+  FROM comments c
+  JOIN comment_thread ct ON c.parent_id = ct.id
+)
+SELECT 
+  c1.content as parent_comment,
+  c2.content as reply,
+  c2.level
+FROM comment_thread c1
+JOIN comment_thread c2 ON c1.id = c2.parent_id
+ORDER BY c1.id, c2.level;`,
+      expectedResult: `WITH RECURSIVE comment_thread AS (
+  SELECT id, content, parent_id, 1 as level
+  FROM comments
+  WHERE parent_id IS NULL
+  
+  UNION ALL
+  
+  SELECT c.id, c.content, c.parent_id, ct.level + 1
+  FROM comments c
+  JOIN comment_thread ct ON c.parent_id = ct.id
+)
+SELECT 
+  c1.content as parent_comment,
+  c2.content as reply,
+  c2.level
+FROM comment_thread c1
+JOIN comment_thread c2 ON c1.id = c2.parent_id
+ORDER BY c1.id, c2.level;`,
+      hint: 'Use recursive CTEs to traverse hierarchical data structures.'
+    },
+    {
+      id: 'cross-joins',
+      title: 'Cross Joins and Cartesian Products',
+      content: 'Learn when and how to use cross joins effectively, including generating test data and creating combinations.',
+      exampleQuery: `SELECT 
+  p1.name as player1,
+  p2.name as player2,
+  CASE 
+    WHEN p1.rating > p2.rating THEN 'Player 1 favored'
+    WHEN p1.rating < p2.rating THEN 'Player 2 favored'
+    ELSE 'Even match'
+  END as prediction
+FROM players p1
+CROSS JOIN players p2
+WHERE p1.id < p2.id
+ORDER BY ABS(p1.rating - p2.rating);`,
+      exerciseQuery: `SELECT 
+  d.date,
+  p.product_name,
+  COALESCE(s.quantity, 0) as quantity_sold
+FROM 
+  (SELECT DISTINCT DATE(created_at) as date FROM sales) d
+CROSS JOIN 
+  (SELECT DISTINCT product_name FROM products) p
+LEFT JOIN 
+  (SELECT 
+    DATE(created_at) as date,
+    product_name,
+    SUM(quantity) as quantity
+   FROM sales
+   GROUP BY DATE(created_at), product_name) s
+ON d.date = s.date AND p.product_name = s.product_name
+ORDER BY d.date, p.product_name;`,
+      expectedResult: `SELECT 
+  d.date,
+  p.product_name,
+  COALESCE(s.quantity, 0) as quantity_sold
+FROM 
+  (SELECT DISTINCT DATE(created_at) as date FROM sales) d
+CROSS JOIN 
+  (SELECT DISTINCT product_name FROM products) p
+LEFT JOIN 
+  (SELECT 
+    DATE(created_at) as date,
+    product_name,
+    SUM(quantity) as quantity
+   FROM sales
+   GROUP BY DATE(created_at), product_name) s
+ON d.date = s.date AND p.product_name = s.product_name
+ORDER BY d.date, p.product_name;`,
+      hint: 'Use CROSS JOIN to generate all possible combinations and LEFT JOIN to fill in actual data.'
+    }
+  ],
+  'advanced-aggregation': [
+    {
+      id: 'pivot-tables',
+      title: 'Creating Pivot Tables',
+      content: 'Learn how to transform rows into columns using conditional aggregation to create pivot tables.',
+      exampleQuery: `SELECT 
+  product_category,
+  SUM(CASE WHEN MONTH(sale_date) = 1 THEN amount ELSE 0 END) as jan_sales,
+  SUM(CASE WHEN MONTH(sale_date) = 2 THEN amount ELSE 0 END) as feb_sales,
+  SUM(CASE WHEN MONTH(sale_date) = 3 THEN amount ELSE 0 END) as mar_sales,
+  SUM(amount) as total_sales
+FROM sales
+WHERE YEAR(sale_date) = 2024
+GROUP BY product_category
+ORDER BY total_sales DESC;`,
+      exerciseQuery: `SELECT 
+  department,
+  COUNT(CASE WHEN performance_rating = 'Excellent' THEN 1 END) as excellent_count,
+  COUNT(CASE WHEN performance_rating = 'Good' THEN 1 END) as good_count,
+  COUNT(CASE WHEN performance_rating = 'Average' THEN 1 END) as average_count,
+  COUNT(CASE WHEN performance_rating = 'Poor' THEN 1 END) as poor_count,
+  COUNT(*) as total_employees,
+  ROUND(AVG(salary), 2) as avg_salary
+FROM employees
+GROUP BY department
+ORDER BY department;`,
+      expectedResult: `SELECT 
+  department,
+  COUNT(CASE WHEN performance_rating = 'Excellent' THEN 1 END) as excellent_count,
+  COUNT(CASE WHEN performance_rating = 'Good' THEN 1 END) as good_count,
+  COUNT(CASE WHEN performance_rating = 'Average' THEN 1 END) as average_count,
+  COUNT(CASE WHEN performance_rating = 'Poor' THEN 1 END) as poor_count,
+  COUNT(*) as total_employees,
+  ROUND(AVG(salary), 2) as avg_salary
+FROM employees
+GROUP BY department
+ORDER BY department;`,
+      hint: 'Use CASE statements within aggregate functions to create columns for each category.'
+    },
+    {
+      id: 'advanced-grouping',
+      title: 'Advanced Grouping Operations',
+      content: 'Learn to use advanced grouping features like ROLLUP, CUBE, and GROUPING SETS for multi-dimensional analysis.',
+      exampleQuery: `SELECT 
+  COALESCE(region, 'All Regions') as region,
+  COALESCE(product_category, 'All Categories') as category,
+  SUM(sales_amount) as total_sales,
+  COUNT(*) as transaction_count
+FROM sales
+GROUP BY ROLLUP(region, product_category)
+ORDER BY 
+  CASE WHEN region IS NULL THEN 1 ELSE 0 END,
+  region,
+  CASE WHEN product_category IS NULL THEN 1 ELSE 0 END,
+  product_category;`,
+      exerciseQuery: `SELECT 
+  COALESCE(YEAR(order_date), 'All Years') as year,
+  COALESCE(QUARTER(order_date), 'All Quarters') as quarter,
+  COALESCE(customer_segment, 'All Segments') as segment,
+  SUM(order_amount) as total_orders,
+  COUNT(DISTINCT customer_id) as unique_customers,
+  ROUND(AVG(order_amount), 2) as avg_order_value
+FROM orders
+GROUP BY GROUPING SETS(
+  (YEAR(order_date), QUARTER(order_date), customer_segment),
+  (YEAR(order_date), QUARTER(order_date)),
+  (YEAR(order_date), customer_segment),
+  (QUARTER(order_date), customer_segment),
+  (YEAR(order_date)),
+  (QUARTER(order_date)),
+  (customer_segment),
+  ()
+)
+ORDER BY 
+  CASE WHEN year = 'All Years' THEN 1 ELSE 0 END,
+  year,
+  CASE WHEN quarter = 'All Quarters' THEN 1 ELSE 0 END,
+  quarter,
+  CASE WHEN segment = 'All Segments' THEN 1 ELSE 0 END,
+  segment;`,
+      expectedResult: `SELECT 
+  COALESCE(YEAR(order_date), 'All Years') as year,
+  COALESCE(QUARTER(order_date), 'All Quarters') as quarter,
+  COALESCE(customer_segment, 'All Segments') as segment,
+  SUM(order_amount) as total_orders,
+  COUNT(DISTINCT customer_id) as unique_customers,
+  ROUND(AVG(order_amount), 2) as avg_order_value
+FROM orders
+GROUP BY GROUPING SETS(
+  (YEAR(order_date), QUARTER(order_date), customer_segment),
+  (YEAR(order_date), QUARTER(order_date)),
+  (YEAR(order_date), customer_segment),
+  (QUARTER(order_date), customer_segment),
+  (YEAR(order_date)),
+  (QUARTER(order_date)),
+  (customer_segment),
+  ()
+)
+ORDER BY 
+  CASE WHEN year = 'All Years' THEN 1 ELSE 0 END,
+  year,
+  CASE WHEN quarter = 'All Quarters' THEN 1 ELSE 0 END,
+  quarter,
+  CASE WHEN segment = 'All Segments' THEN 1 ELSE 0 END,
+  segment;`,
+      hint: 'Use GROUPING SETS to create multiple levels of aggregation in a single query.'
+    }
+  ],
+  'data-analysis': [
+    {
+      id: 'time-series',
+      title: 'Time Series Analysis',
+      content: 'Learn to analyze time-series data using window functions and date operations.',
+      exampleQuery: `WITH daily_metrics AS (
+  SELECT 
+    DATE(created_at) as date,
+    COUNT(*) as daily_orders,
+    SUM(amount) as daily_revenue,
+    COUNT(DISTINCT customer_id) as unique_customers
+  FROM orders
+  GROUP BY DATE(created_at)
+)
+SELECT 
+  date,
+  daily_orders,
+  daily_revenue,
+  unique_customers,
+  AVG(daily_orders) OVER (ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) as weekly_avg_orders,
+  SUM(daily_revenue) OVER (ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) as weekly_revenue,
+  LAG(daily_revenue, 7) OVER (ORDER BY date) as revenue_week_ago,
+  ROUND((daily_revenue - LAG(daily_revenue, 7) OVER (ORDER BY date)) / LAG(daily_revenue, 7) OVER (ORDER BY date) * 100, 2) as week_over_week_growth
+FROM daily_metrics
+ORDER BY date DESC;`,
+      exerciseQuery: `WITH monthly_metrics AS (
+  SELECT 
+    DATE_FORMAT(created_at, '%Y-%m') as month,
+    COUNT(*) as total_orders,
+    SUM(amount) as total_revenue,
+    COUNT(DISTINCT customer_id) as unique_customers,
+    SUM(CASE WHEN is_new_customer THEN 1 ELSE 0 END) as new_customers
+  FROM orders
+  GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+)
+SELECT 
+  month,
+  total_orders,
+  total_revenue,
+  unique_customers,
+  new_customers,
+  ROUND(total_revenue / unique_customers, 2) as revenue_per_customer,
+  ROUND(AVG(total_revenue) OVER (ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) as three_month_avg_revenue,
+  ROUND((total_revenue - LAG(total_revenue) OVER (ORDER BY month)) / LAG(total_revenue) OVER (ORDER BY month) * 100, 2) as month_over_month_growth,
+  ROUND((new_customers * 100.0 / unique_customers), 2) as new_customer_percentage
+FROM monthly_metrics
+ORDER BY month DESC;`,
+      expectedResult: `WITH monthly_metrics AS (
+  SELECT 
+    DATE_FORMAT(created_at, '%Y-%m') as month,
+    COUNT(*) as total_orders,
+    SUM(amount) as total_revenue,
+    COUNT(DISTINCT customer_id) as unique_customers,
+    SUM(CASE WHEN is_new_customer THEN 1 ELSE 0 END) as new_customs
+  FROM orders
+  GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+)
+SELECT 
+  month,
+  total_orders,
+  total_revenue,
+  unique_customers,
+  new_customers,
+  ROUND(total_revenue / unique_customers, 2) as revenue_per_customer,
+  ROUND(AVG(total_revenue) OVER (ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) as three_month_avg_revenue,
+  ROUND((total_revenue - LAG(total_revenue) OVER (ORDER BY month)) / LAG(total_revenue) OVER (ORDER BY month) * 100, 2) as month_over_month_growth,
+  ROUND((new_customers * 100.0 / unique_customers), 2) as new_customer_percentage
+FROM monthly_metrics
+ORDER BY month DESC;`,
+      hint: 'Use window functions to calculate running totals, averages, and growth rates.'
+    },
+    {
+      id: 'customer-analytics',
+      title: 'Customer Analytics',
+      content: 'Learn to analyze customer behavior and calculate key metrics like retention, churn, and lifetime value.',
+      exampleQuery: `WITH customer_activity AS (
+  SELECT 
+    customer_id,
+    MIN(created_at) as first_purchase,
+    MAX(created_at) as last_purchase,
+    COUNT(DISTINCT DATE(created_at)) as active_days,
+    COUNT(*) as total_orders,
+    SUM(amount) as total_spent
+  FROM orders
+  GROUP BY customer_id
+),
+cohort_analysis AS (
+  SELECT 
+    DATE_FORMAT(first_purchase, '%Y-%m') as cohort_month,
+    COUNT(*) as cohort_size,
+    COUNT(CASE WHEN DATEDIFF(last_purchase, first_purchase) >= 30 THEN 1 END) as retained_30d,
+    COUNT(CASE WHEN DATEDIFF(last_purchase, first_purchase) >= 90 THEN 1 END) as retained_90d,
+    ROUND(AVG(total_spent), 2) as avg_lifetime_value,
+    ROUND(AVG(total_orders), 2) as avg_orders_per_customer
+  FROM customer_activity
+  GROUP BY DATE_FORMAT(first_purchase, '%Y-%m')
+)
+SELECT 
+  cohort_month,
+  cohort_size,
+  ROUND(retained_30d * 100.0 / cohort_size, 2) as retention_rate_30d,
+  ROUND(retained_90d * 100.0 / cohort_size, 2) as retention_rate_90d,
+  avg_lifetime_value,
+  avg_orders_per_customer
+FROM cohort_analysis
+ORDER BY cohort_month;`,
+      exerciseQuery: `WITH customer_segments AS (
+  SELECT 
+    customer_id,
+    CASE 
+      WHEN total_orders >= 10 THEN 'VIP'
+      WHEN total_orders >= 5 THEN 'Regular'
+      ELSE 'New'
+    END as segment,
+    total_orders,
+    total_spent,
+    DATEDIFF(CURRENT_DATE, last_purchase) as days_since_last_purchase
+  FROM (
+    SELECT 
+      customer_id,
+      COUNT(*) as total_orders,
+      SUM(amount) as total_spent,
+      MAX(created_at) as last_purchase
+    FROM orders
+    GROUP BY customer_id
+  ) customer_stats
+),
+segment_metrics AS (
+  SELECT 
+    segment,
+    COUNT(*) as customer_count,
+    ROUND(AVG(total_orders), 2) as avg_orders,
+    ROUND(AVG(total_spent), 2) as avg_spent,
+    ROUND(AVG(days_since_last_purchase), 2) as avg_days_inactive,
+    COUNT(CASE WHEN days_since_last_purchase > 90 THEN 1 END) as churned_customers
+  FROM customer_segments
+  GROUP BY segment
+)
+SELECT 
+  segment,
+  customer_count,
+  ROUND(customer_count * 100.0 / SUM(customer_count) OVER (), 2) as segment_percentage,
+  avg_orders,
+  avg_spent,
+  avg_days_inactive,
+  ROUND(churned_customers * 100.0 / customer_count, 2) as churn_rate
+FROM segment_metrics
+ORDER BY avg_spent DESC;`,
+      expectedResult: `WITH customer_segments AS (
+  SELECT 
+    customer_id,
+    CASE 
+      WHEN total_orders >= 10 THEN 'VIP'
+      WHEN total_orders >= 5 THEN 'Regular'
+      ELSE 'New'
+    END as segment,
+    total_orders,
+    total_spent,
+    DATEDIFF(CURRENT_DATE, last_purchase) as days_since_last_purchase
+  FROM (
+    SELECT 
+      customer_id,
+      COUNT(*) as total_orders,
+      SUM(amount) as total_spent,
+      MAX(created_at) as last_purchase
+    FROM orders
+    GROUP BY customer_id
+  ) customer_stats
+),
+segment_metrics AS (
+  SELECT 
+    segment,
+    COUNT(*) as customer_count,
+    ROUND(AVG(total_orders), 2) as avg_orders,
+    ROUND(AVG(total_spent), 2) as avg_spent,
+    ROUND(AVG(days_since_last_purchase), 2) as avg_days_inactive,
+    COUNT(CASE WHEN days_since_last_purchase > 90 THEN 1 END) as churned_customers
+  FROM customer_segments
+  GROUP BY segment
+)
+SELECT 
+  segment,
+  customer_count,
+  ROUND(customer_count * 100.0 / SUM(customer_count) OVER (), 2) as segment_percentage,
+  avg_orders,
+  avg_spent,
+  avg_days_inactive,
+  ROUND(churned_customers * 100.0 / customer_count, 2) as churn_rate
+FROM segment_metrics
+ORDER BY avg_spent DESC;`,
+      hint: 'Use CASE statements to create customer segments and calculate segment-specific metrics.'
+    }
   ]
 };
 
