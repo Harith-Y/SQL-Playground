@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Snackbar, Alert } from '@mui/material';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useMediaQuery } from '@mui/material';
 
 import Navbar from './components/Navbar';
 import SQLEditor from './components/SQLEditor';
@@ -69,6 +70,8 @@ const Playground = () => {
   const [error, setError] = useState<string | null>(null);
   const [schema, setSchema] = useState<SchemaDefinition>(defaultSchema);
   const [savedQueries, setSavedQueries] = useState<Array<{ title: string; query: string }>>([]);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // Fetch initial schema
   useEffect(() => {
@@ -150,20 +153,24 @@ const Playground = () => {
       flexDirection: 'column', 
       height: '100vh',
       p: { xs: 1, sm: 2 },
-      gap: { xs: 1, sm: 2 }
+      gap: { xs: 1, sm: 2 },
+      overflow: 'hidden'
     }}>
       <Box sx={{ 
         display: 'flex', 
         flexDirection: { xs: 'column', md: 'row' },
         gap: { xs: 1, sm: 2 },
-        height: '100%'
+        height: '100%',
+        overflow: 'hidden'
       }}>
         <Box sx={{ 
           flex: 1, 
           display: 'flex', 
           flexDirection: 'column', 
           gap: { xs: 1, sm: 2 },
-          minWidth: 0 // Prevents overflow
+          minWidth: 0, // Prevents overflow
+          overflow: 'hidden',
+          height: { xs: '60vh', md: '100%' }
         }}>
           <SQLEditor
             value={currentQuery}
@@ -176,7 +183,9 @@ const Playground = () => {
         </Box>
         <Box sx={{ 
           width: { xs: '100%', md: '300px' },
-          minWidth: { xs: '100%', md: '300px' }
+          minWidth: { xs: '100%', md: '300px' },
+          height: { xs: '40vh', md: '100%' },
+          overflow: 'auto'
         }}>
           <SchemaViewer
             schema={schema}
@@ -191,8 +200,11 @@ const Playground = () => {
         autoHideDuration={6000}
         onClose={handleCloseError}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        sx={{ 
+          bottom: { xs: 90, sm: 24 } // Adjust for mobile bottom navigation
+        }}
       >
-        <Alert onClose={handleCloseError} severity="error">
+        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
           {error}
         </Alert>
       </Snackbar>

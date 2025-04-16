@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, Container, Avatar, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Alert } from '@mui/material';
+import { Box, Typography, Paper, Container, Avatar, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Alert, useTheme, useMediaQuery } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { changePassword } from '../services/firebase';
 import AuthThemeToggle from './AuthThemeToggle';
@@ -14,6 +14,8 @@ const Dashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handlePasswordDialogOpen = () => {
     setOpenPasswordDialog(true);
@@ -58,16 +60,16 @@ const Dashboard = () => {
       sx={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        py: 4,
-        pb: 10,
+        py: isMobile ? 2 : 4,
+        pb: isMobile ? 6 : 10,
       }}
     >
       <AuthThemeToggle />
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ px: isMobile ? 2 : 3 }}>
         <Paper
           elevation={24}
           sx={{
-            p: 4,
+            p: isMobile ? 2 : 4,
             borderRadius: 4,
             backdropFilter: 'blur(10px)',
           }}
@@ -77,23 +79,23 @@ const Dashboard = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              mb: 4,
+              mb: isMobile ? 2 : 4,
             }}
           >
             <Avatar
               sx={{
-                width: 100,
-                height: 100,
-                mb: 2,
+                width: isMobile ? 60 : 100,
+                height: isMobile ? 60 : 100,
+                mb: isMobile ? 1 : 2,
                 bgcolor: 'secondary.main',
               }}
             >
               {currentUser?.email?.[0].toUpperCase()}
             </Avatar>
-            <Typography variant="h4" component="h1" gutterBottom>
+            <Typography variant={isMobile ? "h5" : "h4"} component="h1" gutterBottom>
               Welcome, {currentUser?.email}
             </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
+            <Typography variant={isMobile ? "body2" : "subtitle1"} color="text.secondary">
               Your Personal Dashboard
             </Typography>
           </Box>
@@ -101,38 +103,38 @@ const Dashboard = () => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: 3,
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: isMobile ? 2 : 3,
             }}
           >
             <Paper
               sx={{
-                p: 3,
+                p: isMobile ? 2 : 3,
                 borderRadius: 2,
               }}
             >
-              <Typography variant="h6" gutterBottom>
+              <Typography variant={isMobile ? "h6" : "h5"} gutterBottom>
                 Account Information
               </Typography>
-              <Typography variant="body1">
+              <Typography variant={isMobile ? "body2" : "body1"}>
                 Email: {currentUser?.email}
               </Typography>
-              <Typography variant="body1">
+              <Typography variant={isMobile ? "body2" : "body1"}>
                 Last Login: {new Date().toLocaleDateString()}
               </Typography>
             </Paper>
 
             <Paper
               sx={{
-                p: 3,
+                p: isMobile ? 2 : 3,
                 borderRadius: 2,
               }}
             >
-              <Typography variant="h6" gutterBottom>
+              <Typography variant={isMobile ? "h6" : "h5"} gutterBottom>
                 Quick Actions
               </Typography>
               <Typography 
-                variant="body1" 
+                variant={isMobile ? "body2" : "body1"}
                 sx={{ 
                   cursor: 'pointer',
                   '&:hover': {
@@ -145,7 +147,7 @@ const Dashboard = () => {
                 • Change Password
               </Typography>
               <Typography 
-                variant="body1" 
+                variant={isMobile ? "body2" : "body1"}
                 sx={{ 
                   cursor: 'pointer',
                   '&:hover': {
@@ -162,7 +164,7 @@ const Dashboard = () => {
         </Paper>
       </Container>
 
-      <Dialog open={openPasswordDialog} onClose={handlePasswordDialogClose}>
+      <Dialog open={openPasswordDialog} onClose={handlePasswordDialogClose} fullScreen={isMobile}>
         <DialogTitle>Change Password</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -175,6 +177,7 @@ const Dashboard = () => {
             fullWidth
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
+            size={isMobile ? "small" : "medium"}
           />
           <TextField
             margin="dense"
@@ -183,6 +186,7 @@ const Dashboard = () => {
             fullWidth
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
+            size={isMobile ? "small" : "medium"}
           />
           <TextField
             margin="dense"
@@ -191,11 +195,12 @@ const Dashboard = () => {
             fullWidth
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            size={isMobile ? "small" : "medium"}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handlePasswordDialogClose}>Cancel</Button>
-          <Button onClick={handlePasswordChange} variant="contained" color="primary">
+          <Button onClick={handlePasswordDialogClose} size={isMobile ? "small" : "medium"}>Cancel</Button>
+          <Button onClick={handlePasswordChange} variant="contained" color="primary" size={isMobile ? "small" : "medium"}>
             Change Password
           </Button>
         </DialogActions>
