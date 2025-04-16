@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Snackbar, Alert } from '@mui/material';
+import { Box, Snackbar, Alert, useTheme as useMuiTheme, useMediaQuery, ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useMediaQuery } from '@mui/material';
 
 import Navbar from './components/Navbar';
 import SQLEditor from './components/SQLEditor';
@@ -70,8 +69,8 @@ const Playground = () => {
   const [error, setError] = useState<string | null>(null);
   const [schema, setSchema] = useState<SchemaDefinition>(defaultSchema);
   const [savedQueries, setSavedQueries] = useState<Array<{ title: string; query: string }>>([]);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const muiTheme = useMuiTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
 
   // Fetch initial schema
   useEffect(() => {
@@ -214,92 +213,95 @@ const Playground = () => {
 
 function App() {
   const { currentTheme } = useTheme();
+  const muiTheme = useMuiTheme();
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            minHeight: '100vh',
-            backgroundColor: currentTheme.colors.background,
-            color: currentTheme.colors.text
-          }}>
-            <Navbar />
-            <Box sx={{ flexGrow: 1 }}>
-              <Routes>
-                <Route path="/login" element={
-                  <AuthThemeProvider>
-                    <Login />
-                  </AuthThemeProvider>
-                } />
-                <Route path="/register" element={
-                  <AuthThemeProvider>
-                    <Register />
-                  </AuthThemeProvider>
-                } />
-                <Route path="/forgotpassword" element={
-                  <AuthThemeProvider>
-                    <ForgotPassword />
-                  </AuthThemeProvider>
-                } />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <AuthThemeProvider>
-                        <Dashboard />
-                      </AuthThemeProvider>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Playground />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tutorials"
-                  element={
-                    <ProtectedRoute>
-                      <Tutorials />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tutorials/:tutorialId"
-                  element={
-                    <ProtectedRoute>
-                      <TutorialLesson />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/challenges"
-                  element={
-                    <ProtectedRoute>
-                      <Challenges />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/contribute"
-                  element={
-                    <ProtectedRoute>
-                      <Contribute />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
+    <MuiThemeProvider theme={muiTheme}>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              minHeight: '100vh',
+              backgroundColor: currentTheme.colors.background,
+              color: currentTheme.colors.text
+            }}>
+              <Navbar />
+              <Box sx={{ flexGrow: 1 }}>
+                <Routes>
+                  <Route path="/login" element={
+                    <AuthThemeProvider>
+                      <Login />
+                    </AuthThemeProvider>
+                  } />
+                  <Route path="/register" element={
+                    <AuthThemeProvider>
+                      <Register />
+                    </AuthThemeProvider>
+                  } />
+                  <Route path="/forgotpassword" element={
+                    <AuthThemeProvider>
+                      <ForgotPassword />
+                    </AuthThemeProvider>
+                  } />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <AuthThemeProvider>
+                          <Dashboard />
+                        </AuthThemeProvider>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Playground />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/tutorials"
+                    element={
+                      <ProtectedRoute>
+                        <Tutorials />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/tutorials/:tutorialId"
+                    element={
+                      <ProtectedRoute>
+                        <TutorialLesson />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/challenges"
+                    element={
+                      <ProtectedRoute>
+                        <Challenges />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/contribute"
+                    element={
+                      <ProtectedRoute>
+                        <Contribute />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </Box>
             </Box>
-          </Box>
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </MuiThemeProvider>
   );
 }
 
