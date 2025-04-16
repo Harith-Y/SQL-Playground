@@ -114,6 +114,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
           sx={{ 
             flexGrow: 1,
             overflow: 'auto',
+            maxHeight: 'calc(100vh - 200px)',
             '&::-webkit-scrollbar': {
               width: '8px',
             },
