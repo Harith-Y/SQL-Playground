@@ -509,6 +509,11 @@ const TutorialLesson: React.FC = () => {
       setActiveStep((prevStep) => prevStep + 1);
       setCurrentQuery('');
       setQueryResult(null);
+      // Scroll to top of the page
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -516,6 +521,11 @@ const TutorialLesson: React.FC = () => {
     setActiveStep((prevStep) => prevStep - 1);
     setCurrentQuery('');
     setQueryResult(null);
+    // Also scroll to top when going back
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const handleExecuteQuery = async () => {
