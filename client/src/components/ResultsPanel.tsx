@@ -104,6 +104,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: currentTheme.colors.results,
+          overflow: 'hidden',
         }}
       >
         <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
@@ -112,9 +113,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
         <TableContainer 
           component={Paper}
           sx={{ 
-            flexGrow: 1,
+            flex: 1,
             overflow: 'auto',
-            maxHeight: 'calc(100vh - 200px)',
+            height: '100%',
             '&::-webkit-scrollbar': {
               width: '8px',
             },
