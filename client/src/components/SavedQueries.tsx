@@ -108,7 +108,19 @@ const SavedQueries: React.FC<SavedQueriesProps> = ({ open, onClose, onSelectQuer
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    const date = new Date(dateString);
+    // Convert to IST (GMT+5:30)
+    const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+    return istDate.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
   };
 
   return (
