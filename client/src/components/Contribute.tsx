@@ -18,15 +18,21 @@ const Contribute = () => {
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         py: 4,
+        pb: 10,
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <Container maxWidth="md">
+      <Container maxWidth="md" sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Paper
           elevation={24}
           sx={{
             p: 4,
             borderRadius: 4,
             backdropFilter: 'blur(10px)',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <Typography variant="h4" component="h1" gutterBottom align="center">
@@ -162,7 +168,7 @@ const Contribute = () => {
             </ListItem>
           </List>
 
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', mb: 4 }}>
             <Button
               variant="outlined"
               onClick={() => navigate('/dashboard')}
