@@ -151,25 +151,30 @@ const Playground = () => {
       display: 'flex', 
       flexDirection: 'column', 
       height: '100vh',
-      p: { xs: 1, sm: 2 },
+      p: 0,
       gap: { xs: 1, sm: 2 },
-      overflow: 'hidden'
+      overflow: 'hidden',
+      width: '100%',
+      maxWidth: '100vw'
     }}>
       <Box sx={{ 
         display: 'flex', 
         flexDirection: { xs: 'column', md: 'row' },
         gap: { xs: 1, sm: 2 },
         height: '100%',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        width: '100%',
+        p: { xs: 1, sm: 2 }
       }}>
         <Box sx={{ 
           flex: 1, 
           display: 'flex', 
           flexDirection: 'column', 
           gap: { xs: 1, sm: 2 },
-          minWidth: 0, // Prevents overflow
+          minWidth: 0,
           overflow: 'hidden',
-          height: { xs: '60vh', md: '100%' }
+          height: { xs: '60vh', md: '100%' },
+          width: '100%'
         }}>
           <SQLEditor
             value={currentQuery}
@@ -184,7 +189,8 @@ const Playground = () => {
           width: { xs: '100%', md: '300px' },
           minWidth: { xs: '100%', md: '300px' },
           height: { xs: '40vh', md: '100%' },
-          overflow: 'auto'
+          overflow: 'auto',
+          p: { xs: 1, sm: 2 }
         }}>
           <SchemaViewer
             schema={schema}
@@ -200,7 +206,8 @@ const Playground = () => {
         onClose={handleCloseError}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         sx={{ 
-          bottom: { xs: 90, sm: 24 } // Adjust for mobile bottom navigation
+          bottom: { xs: 90, sm: 24 },
+          width: { xs: '100%', sm: 'auto' }
         }}
       >
         <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
