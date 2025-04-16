@@ -31,6 +31,7 @@ import {
   ViewQuilt as ViewQuiltIcon,
   Sync as SyncIcon,
   Backup as BackupIcon,
+  BugReport as BugReportIcon,
 } from '@mui/icons-material';
 import SQLEditor from './SQLEditor';
 import ResultsPanel from './ResultsPanel';
@@ -520,6 +521,404 @@ user_query_stats AS (
 SELECT * FROM user_query_stats
 ORDER BY query_count DESC, avg_execution_time ASC;`,
     hint: 'Use CTEs to break down the query into smaller, more efficient parts and optimize join conditions.'
+  },
+  {
+    id: 'pattern-matching-challenge',
+    title: 'Pattern Matching Challenge',
+    description: 'Identify complex patterns in user behavior using advanced SQL techniques.',
+    difficulty: 'Advanced',
+    category: 'Functions',
+    icon: <SearchIcon sx={{ fontSize: 40 }} />,
+    problem: `Given a table of user activities with timestamps, find users who exhibit a "sawtooth" pattern in their activity:
+    1. At least 3 consecutive days of increasing activity
+    2. Followed by a sharp drop (less than 50% of peak)
+    3. Then a return to the previous level
+    4. This pattern must repeat at least twice within a 30-day period`,
+    expectedResult: `WITH daily_activity AS (
+  SELECT 
+    user_id,
+    DATE(activity_time) as activity_date,
+    COUNT(*) as activity_count
+  FROM user_activities
+  GROUP BY user_id, DATE(activity_time)
+),
+activity_patterns AS (
+  SELECT 
+    user_id,
+    activity_date,
+    activity_count,
+    LAG(activity_count, 1) OVER (PARTITION BY user_id ORDER BY activity_date) as prev_count,
+    LAG(activity_count, 2) OVER (PARTITION BY user_id ORDER BY activity_date) as prev_prev_count,
+    LAG(activity_count, 3) OVER (PARTITION BY user_id ORDER BY activity_date) as prev_prev_prev_count,
+    LEAD(activity_count, 1) OVER (PARTITION BY user_id ORDER BY activity_date) as next_count,
+    LEAD(activity_count, 2) OVER (PARTITION BY user_id ORDER BY activity_date) as next_next_count
+  FROM daily_activity
+),
+pattern_occurrences AS (
+  SELECT 
+    user_id,
+    activity_date,
+    COUNT(*) OVER (PARTITION BY user_id ORDER BY activity_date RANGE BETWEEN INTERVAL 30 DAY PRECEDING AND CURRENT ROW) as pattern_count
+  FROM activity_patterns
+  WHERE 
+    -- Three consecutive days of increasing activity
+    prev_prev_prev_count < prev_prev_count 
+    AND prev_prev_count < prev_count
+    AND prev_count < activity_count
+    -- Followed by a sharp drop
+    AND next_count < activity_count * 0.5
+    -- And then a return to previous level
+    AND next_next_count >= prev_count
+)
+SELECT DISTINCT
+  u.username,
+  MIN(po.activity_date) as first_pattern_date,
+  MAX(po.activity_date) as last_pattern_date,
+  MAX(po.pattern_count) as total_patterns
+FROM pattern_occurrences po
+JOIN users u ON po.user_id = u.id
+WHERE po.pattern_count >= 2
+GROUP BY u.id, u.username
+ORDER BY total_patterns DESC;`,
+    hint: 'Use window functions to compare activity levels and identify the sawtooth pattern.'
+  },
+  {
+    id: 'network-analysis-challenge',
+    title: 'Network Analysis Challenge',
+    description: 'Analyze user interaction networks and identify key influencers.',
+    difficulty: 'Advanced',
+    category: 'CTEs',
+    icon: <TimelineIcon sx={{ fontSize: 40 }} />,
+    problem: `Given tables of users, their connections, and interaction data, find users who:
+    1. Are in the top 10% of connection count
+    2. Have interactions with at least 80% of their connections
+    3. Have a high "influence score" (calculated as: sum of their connections' activity levels / number of connections)
+    4. Have maintained these metrics consistently for the last 3 months`,
+    expectedResult: `WITH user_connections AS (
+  SELECT 
+    user_id,
+    COUNT(*) as connection_count,
+    PERCENT_RANK() OVER (ORDER BY COUNT(*) DESC) as connection_rank
+  FROM user_connections
+  GROUP BY user_id
+),
+connection_interactions AS (
+  SELECT 
+    uc.user_id,
+    COUNT(DISTINCT c.connection_id) as active_connections,
+    uc.connection_count,
+    SUM(ia.activity_level) as total_connection_activity
+  FROM user_connections uc
+  JOIN connections c ON uc.user_id = c.user_id
+  JOIN interaction_activity ia ON c.connection_id = ia.user_id
+  WHERE ia.activity_date >= DATE_SUB(CURRENT_DATE, INTERVAL 3 MONTH)
+  GROUP BY uc.user_id, uc.connection_count
+),
+monthly_metrics AS (
+  SELECT 
+    user_id,
+    DATE_FORMAT(activity_date, '%Y-%m') as month,
+    active_connections,
+    connection_count,
+    total_connection_activity,
+    (total_connection_activity / NULLIF(connection_count, 0)) as influence_score
+  FROM connection_interactions
+  GROUP BY user_id, DATE_FORMAT(activity_date, '%Y-%m')
+)
+SELECT 
+  u.username,
+  mm.month,
+  mm.connection_count,
+  mm.active_connections,
+  ROUND((mm.active_connections * 100.0 / mm.connection_count), 2) as connection_activity_percentage,
+  ROUND(mm.influence_score, 2) as influence_score
+FROM monthly_metrics mm
+JOIN users u ON mm.user_id = u.id
+JOIN user_connections uc ON mm.user_id = uc.user_id
+WHERE 
+  uc.connection_rank <= 0.1
+  AND (mm.active_connections * 100.0 / mm.connection_count) >= 80
+  AND mm.influence_score >= (
+    SELECT AVG(influence_score) * 1.5 
+    FROM monthly_metrics
+  )
+GROUP BY u.id, u.username, mm.month, mm.connection_count, mm.active_connections, mm.influence_score
+HAVING COUNT(*) = 3
+ORDER BY mm.influence_score DESC;`,
+    hint: 'Use window functions for ranking and CTEs to break down the complex analysis.'
+  },
+  {
+    id: 'anomaly-detection-challenge',
+    title: 'Anomaly Detection Challenge',
+    description: 'Identify unusual patterns and outliers in user behavior.',
+    difficulty: 'Advanced',
+    category: 'Functions',
+    icon: <BugReportIcon sx={{ fontSize: 40 }} />,
+    problem: `Given a table of user transactions, identify potential fraudulent activity by finding:
+    1. Users with transaction patterns that deviate significantly from their historical behavior
+    2. Unusual time-of-day patterns compared to their normal activity
+    3. Suspicious transaction amounts (using statistical methods)
+    4. Rapid sequences of transactions that are unusual for the user`,
+    expectedResult: `WITH user_stats AS (
+  SELECT 
+    user_id,
+    AVG(amount) as avg_amount,
+    STDDEV(amount) as std_amount,
+    COUNT(*) as total_transactions,
+    AVG(TIME_TO_SEC(TIME(transaction_time))) as avg_time_seconds,
+    STDDEV(TIME_TO_SEC(TIME(transaction_time))) as std_time_seconds
+  FROM transactions
+  WHERE transaction_time >= DATE_SUB(CURRENT_DATE, INTERVAL 90 DAY)
+  GROUP BY user_id
+),
+recent_transactions AS (
+  SELECT 
+    t.*,
+    u.avg_amount,
+    u.std_amount,
+    u.avg_time_seconds,
+    u.std_time_seconds,
+    ABS(t.amount - u.avg_amount) / NULLIF(u.std_amount, 0) as amount_zscore,
+    ABS(TIME_TO_SEC(TIME(t.transaction_time)) - u.avg_time_seconds) / NULLIF(u.std_time_seconds, 0) as time_zscore
+  FROM transactions t
+  JOIN user_stats u ON t.user_id = u.user_id
+  WHERE t.transaction_time >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
+),
+transaction_sequences AS (
+  SELECT 
+    user_id,
+    transaction_time,
+    amount,
+    amount_zscore,
+    time_zscore,
+    LAG(transaction_time) OVER (PARTITION BY user_id ORDER BY transaction_time) as prev_time,
+    COUNT(*) OVER (
+      PARTITION BY user_id 
+      ORDER BY transaction_time 
+      RANGE BETWEEN INTERVAL 1 HOUR PRECEDING AND CURRENT ROW
+    ) as transactions_last_hour
+  FROM recent_transactions
+)
+SELECT 
+  u.username,
+  ts.transaction_time,
+  ts.amount,
+  ROUND(ts.amount_zscore, 2) as amount_deviation,
+  ROUND(ts.time_zscore, 2) as time_deviation,
+  ts.transactions_last_hour,
+  CASE 
+    WHEN ts.amount_zscore > 3 THEN 'High amount deviation'
+    WHEN ts.time_zscore > 3 THEN 'Unusual time'
+    WHEN ts.transactions_last_hour > 5 THEN 'High frequency'
+    ELSE 'Multiple factors'
+  END as anomaly_type
+FROM transaction_sequences ts
+JOIN users u ON ts.user_id = u.id
+WHERE 
+  (ts.amount_zscore > 3 OR ts.time_zscore > 3 OR ts.transactions_last_hour > 5)
+  AND (
+    ts.prev_time IS NULL 
+    OR TIMESTAMPDIFF(MINUTE, ts.prev_time, ts.transaction_time) < 60
+  )
+ORDER BY ts.transaction_time DESC;`,
+    hint: 'Use statistical methods (z-scores) and window functions to detect anomalies.'
+  },
+  {
+    id: 'resource-optimization-challenge',
+    title: 'Resource Optimization Challenge',
+    description: 'Optimize resource allocation based on usage patterns.',
+    difficulty: 'Advanced',
+    category: 'Optimization',
+    icon: <SpeedIcon sx={{ fontSize: 40 }} />,
+    problem: `Given tables of resource usage, user activities, and system performance metrics:
+    1. Identify optimal resource allocation windows
+    2. Find patterns of underutilized resources
+    3. Predict future resource needs
+    4. Suggest optimal scaling strategies`,
+    expectedResult: `WITH resource_usage AS (
+  SELECT 
+    resource_id,
+    DATE_TRUNC('hour', usage_time) as hour_window,
+    AVG(cpu_usage) as avg_cpu,
+    AVG(memory_usage) as avg_memory,
+    COUNT(*) as request_count,
+    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY response_time) as p95_response
+  FROM resource_metrics
+  WHERE usage_time >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+  GROUP BY resource_id, DATE_TRUNC('hour', usage_time)
+),
+usage_patterns AS (
+  SELECT 
+    resource_id,
+    hour_window,
+    avg_cpu,
+    avg_memory,
+    request_count,
+    p95_response,
+    LAG(avg_cpu) OVER (PARTITION BY resource_id ORDER BY hour_window) as prev_cpu,
+    LAG(avg_memory) OVER (PARTITION BY resource_id ORDER BY hour_window) as prev_memory,
+    AVG(avg_cpu) OVER (
+      PARTITION BY resource_id 
+      ORDER BY hour_window 
+      RANGE BETWEEN INTERVAL 7 DAY PRECEDING AND CURRENT ROW
+    ) as weekly_avg_cpu,
+    AVG(avg_memory) OVER (
+      PARTITION BY resource_id 
+      ORDER BY hour_window 
+      RANGE BETWEEN INTERVAL 7 DAY PRECEDING AND CURRENT ROW
+    ) as weekly_avg_memory
+  FROM resource_usage
+),
+optimization_recommendations AS (
+  SELECT 
+    r.resource_id,
+    r.hour_window,
+    r.avg_cpu,
+    r.avg_memory,
+    r.request_count,
+    r.p95_response,
+    CASE 
+      WHEN r.avg_cpu < 20 AND r.avg_memory < 20 THEN 'Underutilized'
+      WHEN r.avg_cpu > 80 OR r.avg_memory > 80 THEN 'Overutilized'
+      ELSE 'Optimal'
+    END as utilization_status,
+    CASE 
+      WHEN r.avg_cpu > up.weekly_avg_cpu * 1.5 THEN 'Scale Up CPU'
+      WHEN r.avg_memory > up.weekly_avg_memory * 1.5 THEN 'Scale Up Memory'
+      WHEN r.avg_cpu < up.weekly_avg_cpu * 0.5 THEN 'Scale Down CPU'
+      WHEN r.avg_memory < up.weekly_avg_memory * 0.5 THEN 'Scale Down Memory'
+      ELSE 'Maintain Current'
+    END as scaling_recommendation,
+    LEAD(r.avg_cpu) OVER (PARTITION BY r.resource_id ORDER BY r.hour_window) as next_hour_cpu,
+    LEAD(r.avg_memory) OVER (PARTITION BY r.resource_id ORDER BY r.hour_window) as next_hour_memory
+  FROM resource_usage r
+  JOIN usage_patterns up ON r.resource_id = up.resource_id AND r.hour_window = up.hour_window
+)
+SELECT 
+  resource_id,
+  hour_window,
+  ROUND(avg_cpu, 2) as cpu_usage,
+  ROUND(avg_memory, 2) as memory_usage,
+  request_count,
+  ROUND(p95_response, 2) as response_time_p95,
+  utilization_status,
+  scaling_recommendation,
+  CASE 
+    WHEN next_hour_cpu > avg_cpu * 1.2 THEN 'Expected CPU Increase'
+    WHEN next_hour_memory > avg_memory * 1.2 THEN 'Expected Memory Increase'
+    ELSE 'Stable'
+  END as next_hour_prediction
+FROM optimization_recommendations
+WHERE utilization_status != 'Optimal'
+ORDER BY hour_window, resource_id;`,
+    hint: 'Use window functions to analyze trends and make predictions about resource usage.'
+  },
+  {
+    id: 'data-quality-challenge',
+    title: 'Data Quality Challenge',
+    description: 'Implement comprehensive data quality checks and validation.',
+    difficulty: 'Advanced',
+    category: 'Security',
+    icon: <SecurityIcon sx={{ fontSize: 40 }} />,
+    problem: `Create a comprehensive data quality monitoring system that:
+    1. Identifies missing or invalid data
+    2. Detects data anomalies and inconsistencies
+    3. Validates data relationships and constraints
+    4. Tracks data quality metrics over time
+    5. Provides actionable insights for data improvement`,
+    expectedResult: `WITH data_quality_metrics AS (
+  SELECT 
+    table_name,
+    column_name,
+    COUNT(*) as total_records,
+    COUNT(CASE WHEN value IS NULL THEN 1 END) as null_count,
+    COUNT(DISTINCT value) as unique_values,
+    MIN(value) as min_value,
+    MAX(value) as max_value,
+    AVG(CASE WHEN value ~ '^[0-9]+$' THEN CAST(value AS NUMERIC) END) as numeric_avg,
+    STDDEV(CASE WHEN value ~ '^[0-9]+$' THEN CAST(value AS NUMERIC) END) as numeric_stddev
+  FROM data_quality_monitoring
+  WHERE monitoring_date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+  GROUP BY table_name, column_name
+),
+relationship_validation AS (
+  SELECT 
+    fk_table,
+    fk_column,
+    COUNT(*) as total_foreign_keys,
+    COUNT(CASE WHEN NOT EXISTS (
+      SELECT 1 FROM referenced_table rt 
+      WHERE rt.pk_column = fk.value
+    ) THEN 1 END) as invalid_references
+  FROM foreign_keys fk
+  GROUP BY fk_table, fk_column
+),
+data_quality_scores AS (
+  SELECT 
+    dqm.table_name,
+    dqm.column_name,
+    dqm.total_records,
+    CASE 
+      WHEN dqm.null_count > 0 THEN 
+        ROUND((dqm.null_count * 100.0 / dqm.total_records), 2)
+      ELSE 0 
+    END as null_percentage,
+    CASE 
+      WHEN dqm.unique_values = 1 THEN 0
+      ELSE ROUND((dqm.unique_values * 100.0 / dqm.total_records), 2)
+    END as uniqueness_score,
+    CASE 
+      WHEN dqm.numeric_stddev IS NOT NULL THEN
+        ROUND((dqm.numeric_stddev * 100.0 / NULLIF(dqm.numeric_avg, 0)), 2)
+      ELSE NULL
+    END as value_variation,
+    rv.invalid_references,
+    CASE 
+      WHEN dqm.null_count > dqm.total_records * 0.1 THEN 'High'
+      WHEN dqm.null_count > dqm.total_records * 0.05 THEN 'Medium'
+      ELSE 'Low'
+    END as null_risk,
+    CASE 
+      WHEN dqm.unique_values = dqm.total_records THEN 'High'
+      WHEN dqm.unique_values > dqm.total_records * 0.8 THEN 'Medium'
+      ELSE 'Low'
+    END as uniqueness_risk
+  FROM data_quality_metrics dqm
+  LEFT JOIN relationship_validation rv 
+    ON dqm.table_name = rv.fk_table 
+    AND dqm.column_name = rv.fk_column
+)
+SELECT 
+  table_name,
+  column_name,
+  total_records,
+  null_percentage,
+  uniqueness_score,
+  value_variation,
+  invalid_references,
+  null_risk,
+  uniqueness_risk,
+  CASE 
+    WHEN null_percentage > 10 OR uniqueness_score < 50 OR invalid_references > 0 THEN 'Critical'
+    WHEN null_percentage > 5 OR uniqueness_score < 70 THEN 'Warning'
+    ELSE 'Good'
+  END as overall_quality,
+  CASE 
+    WHEN null_percentage > 10 THEN 'Address null values'
+    WHEN uniqueness_score < 50 THEN 'Investigate low uniqueness'
+    WHEN invalid_references > 0 THEN 'Fix foreign key constraints'
+    WHEN value_variation > 200 THEN 'Check for outliers'
+    ELSE 'No immediate action needed'
+  END as recommended_action
+FROM data_quality_scores
+ORDER BY 
+  CASE overall_quality
+    WHEN 'Critical' THEN 1
+    WHEN 'Warning' THEN 2
+    ELSE 3
+  END,
+  null_percentage DESC;`,
+    hint: 'Use statistical methods and relationship validation to assess data quality.'
   }
 ];
 
