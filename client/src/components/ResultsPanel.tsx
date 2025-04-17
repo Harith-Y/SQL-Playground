@@ -117,9 +117,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
           gap: 1
         }}>
           <Typography variant="h6">Query Results</Typography>
-          {result?.columns && (
+          {result?.columns && result?.results && (
             <Typography variant="caption" color="text.secondary">
-              {result.rows.length} row(s), {result.columns.length} column(s)
+              {result.results.length} row(s), {result.columns.length} column(s)
             </Typography>
           )}
         </Box>
@@ -148,7 +148,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
                 {result.error}
               </Typography>
             </Box>
-          ) : result?.columns ? (
+          ) : result?.columns && result?.results ? (
             <TableContainer>
               <Table size="small" stickyHeader>
                 <TableHead>
@@ -168,9 +168,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {result.rows.map((row, rowIndex) => (
+                  {result?.results?.map((row: Record<string, any>, rowIndex: number) => (
                     <TableRow key={rowIndex}>
-                      {row.map((cell, cellIndex) => (
+                      {result?.columns?.map((column: string, cellIndex: number) => (
                         <TableCell 
                           key={cellIndex}
                           sx={{ 
@@ -181,7 +181,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
                             fontSize: { xs: '0.75rem', sm: '0.875rem' }
                           }}
                         >
-                          {cell === null ? 'NULL' : cell.toString()}
+                          {row[column] === null ? 'NULL' : row[column].toString()}
                         </TableCell>
                       ))}
                     </TableRow>
