@@ -123,16 +123,28 @@ SELECT * FROM users;`;
           backgroundColor: currentTheme.colors.editor,
         }}
       >
-        <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ 
+          p: 1, 
+          borderBottom: 1, 
+          borderColor: 'divider', 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: { xs: 1, sm: 0 },
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'stretch', sm: 'center' }
+        }}>
           <Typography variant="subtitle2">SQL Editor</Typography>
-          <Box>
+          <Box sx={{ 
+            display: 'flex', 
+            flexWrap: 'wrap',
+            gap: 1
+          }}>
             <Button
               variant="outlined"
               size="small"
               startIcon={<StarBorder />}
               onClick={() => setSavedQueriesOpen(true)}
               disabled={isLoading || readOnly}
-              sx={{ mr: 1 }}
             >
               Saved
             </Button>
@@ -142,7 +154,6 @@ SELECT * FROM users;`;
               startIcon={<History />}
               onClick={() => setHistoryOpen(true)}
               disabled={isLoading || readOnly}
-              sx={{ mr: 1 }}
             >
               History
             </Button>
@@ -152,7 +163,6 @@ SELECT * FROM users;`;
               startIcon={<BookmarkBorder />}
               onClick={handleSaveQuery}
               disabled={isLoading || readOnly || !value.trim()}
-              sx={{ mr: 1 }}
             >
               Fav
             </Button>
@@ -162,6 +172,7 @@ SELECT * FROM users;`;
               startIcon={isLoading ? <CircularProgress size={20} /> : <PlayArrow />}
               onClick={() => onExecuteQuery(value)}
               disabled={isLoading || readOnly}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
             >
               Run Query
             </Button>
@@ -182,6 +193,15 @@ SELECT * FROM users;`;
               wordWrap: 'on',
               automaticLayout: true,
               readOnly,
+              lineNumbers: 'on',
+              folding: true,
+              scrollbar: {
+                vertical: 'visible',
+                horizontal: 'visible',
+                useShadows: false,
+                verticalScrollbarSize: 10,
+                horizontalScrollbarSize: 10
+              }
             }}
           />
         </Box>

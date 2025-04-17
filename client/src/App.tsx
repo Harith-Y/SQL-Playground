@@ -148,21 +148,17 @@ const Playground = () => {
 
   return (
     <Box sx={{ 
+      height: { xs: 'auto', md: '100vh' }, 
       display: 'flex', 
-      flexDirection: 'column', 
-      height: '100vh',
-      p: 0,
-      gap: { xs: 1, sm: 2 },
-      overflow: 'hidden',
-      width: '100%',
-      maxWidth: '100vw'
+      flexDirection: 'column',
+      overflow: 'hidden'
     }}>
       <Box sx={{ 
         display: 'flex', 
         flexDirection: { xs: 'column', md: 'row' },
         gap: { xs: 1, sm: 2 },
-        height: '100%',
-        overflow: 'hidden',
+        height: { xs: 'auto', md: 'calc(100vh - 64px)' },
+        overflow: { xs: 'auto', md: 'hidden' },
         width: '100%',
         p: { xs: 1, sm: 2 }
       }}>
@@ -172,25 +168,32 @@ const Playground = () => {
           flexDirection: 'column', 
           gap: { xs: 1, sm: 2 },
           minWidth: 0,
-          overflow: 'hidden',
-          height: { xs: '60vh', md: '100%' },
-          width: '100%'
+          height: { xs: 'auto', md: '100%' }
         }}>
-          <SQLEditor
-            value={currentQuery}
-            onChange={handleQueryChange}
-            onExecuteQuery={handleQueryExecute}
-            isLoading={isLoading}
-            onQueriesLoad={handleQueriesLoad}
-          />
-          <ResultsPanel result={queryResult} isLoading={isLoading} />
+          <Box sx={{ 
+            height: { xs: '40vh', md: '50%' },
+            minHeight: { xs: '300px', md: 'auto' }
+          }}>
+            <SQLEditor
+              value={currentQuery}
+              onChange={handleQueryChange}
+              onExecuteQuery={handleQueryExecute}
+              isLoading={isLoading}
+              onQueriesLoad={handleQueriesLoad}
+            />
+          </Box>
+          <Box sx={{ 
+            height: { xs: '40vh', md: '50%' },
+            minHeight: { xs: '300px', md: 'auto' }
+          }}>
+            <ResultsPanel result={queryResult} isLoading={isLoading} />
+          </Box>
         </Box>
         <Box sx={{ 
           width: { xs: '100%', md: '300px' },
           minWidth: { xs: '100%', md: '300px' },
-          height: { xs: '40vh', md: '100%' },
-          overflow: 'auto',
-          p: { xs: 1, sm: 2 }
+          height: { xs: 'auto', md: '100%' },
+          minHeight: { xs: '300px', md: 'auto' }
         }}>
           <SchemaViewer
             schema={schema}
@@ -207,10 +210,19 @@ const Playground = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         sx={{ 
           bottom: { xs: 90, sm: 24 },
-          width: { xs: '100%', sm: 'auto' }
+          width: { xs: '95%', sm: 'auto' },
+          left: { xs: '50%' },
+          transform: { xs: 'translateX(-50%)', sm: 'none' }
         }}
       >
-        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
+        <Alert 
+          onClose={handleCloseError} 
+          severity="error" 
+          sx={{ 
+            width: '100%',
+            wordBreak: 'break-word'
+          }}
+        >
           {error}
         </Alert>
       </Snackbar>

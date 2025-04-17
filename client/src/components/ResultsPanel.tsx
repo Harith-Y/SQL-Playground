@@ -104,51 +104,123 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, isLoading }) => {
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: currentTheme.colors.results,
-          overflow: 'hidden',
         }}
       >
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ 
+          p: 2, 
+          borderBottom: 1, 
+          borderColor: 'divider',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 1
+        }}>
           <Typography variant="h6">Query Results</Typography>
+          {result?.columns && (
+            <Typography variant="caption" color="text.secondary">
+              {result.rows.length} row(s), {result.columns.length} column(s)
+            </Typography>
+          )}
         </Box>
-        <TableContainer 
-          component={Paper}
-          sx={{ 
-            flex: 1,
-            overflow: 'auto',
-            height: '100%',
-            '&::-webkit-scrollbar': {
-              width: '8px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: '#1a1a1a',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#666',
-              borderRadius: '4px',
-            },
-          }}
-        >
-          <Table size="small" stickyHeader>
-            <TableHead>
-              <TableRow>
-                {columns.map((column: string) => (
-                  <TableCell key={column}>{column}</TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {result.results.map((row: Record<string, any>, index: number) => (
-                <TableRow key={index}>
-                  {columns.map((column: string) => (
-                    <TableCell key={`${index}-${column}`}>
-                      {row[column] !== null ? row[column].toString() : 'NULL'}
-                    </TableCell>
+        <Box sx={{ 
+          flexGrow: 1, 
+          overflow: 'auto',
+          position: 'relative'
+        }}>
+          {isLoading ? (
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              height: '100%' 
+            }}>
+              <CircularProgress />
+            </Box>
+          ) : result?.error ? (
+            <Box sx={{ p: 2, color: 'error.main' }}>
+              <Typography variant="body1" component="pre" sx={{ 
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: { xs: '0.75rem', sm: '0.875rem' }
+              }}>
+                {result.error}
+              </Typography>
+            </Box>
+          ) : result?.columns ? (
+            <TableContainer>
+              <Table size="small" stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    {result.columns.map((column, index) => (
+                      <TableCell 
+                        key={index}
+                        sx={{ 
+                          whiteSpace: 'nowrap',
+                          fontWeight: 'bold',
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                        }}
+                      >
+                        {column}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {result.rows.map((row, rowIndex) => (
+                    <TableRow key={rowIndex}>
+                      {row.map((cell, cellIndex) => (
+                        <TableCell 
+                          key={cellIndex}
+                          sx={{ 
+                            maxWidth: { xs: '150px', sm: '200px', md: '300px' },
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                          }}
+                        >
+                          {cell === null ? 'NULL' : cell.toString()}
+                        </TableCell>
+                      ))}
+                    </TableRow>
                   ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Box sx={{ 
+              p: 2, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 2 
+            }}>
+              <Typography sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+                {result?.changes !== undefined ? (
+                  <>
+                    Query executed successfully. {result.changes} row(s) affected.
+                    {result.lastId !== undefined && ` Last inserted ID: ${result.lastId}`}
+                  </>
+                ) : (
+                  'No results to display'
+                )}
+              </Typography>
+              {result?.changes !== undefined && (
+                <Button
+                  variant="contained"
+                  onClick={() => window.location.reload()}
+                  sx={{ 
+                    alignSelf: { xs: 'stretch', sm: 'flex-start' },
+                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                  }}
+                >
+                  Refresh Results
+                </Button>
+              )}
+            </Box>
+          )}
+        </Box>
       </Paper>
     );
   }
