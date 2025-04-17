@@ -54,7 +54,16 @@ const Navbar = () => {
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {user ? (
             <>
-              <Button color="inherit" onClick={() => navigate('/')}>
+              <Button 
+                color="inherit" 
+                onClick={() => {
+                  if (window.location.pathname === '/') {
+                    window.location.reload();
+                  } else {
+                    navigate('/');
+                  }
+                }}
+              >
                 Playground
               </Button>
               <Button color="inherit" onClick={() => navigate('/tutorials')}>
