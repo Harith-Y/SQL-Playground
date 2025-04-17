@@ -26,7 +26,7 @@ A modern, interactive SQL learning and practice environment built with React, Ty
   - Schema import/export functionality
 
 - **Query Management**
-  - Save and organize your SQL queries
+  - Save and organize your SQL queries along with timestamps
   - Query history tracking
   - Favorite queries for quick access
   - Query sharing capabilities
@@ -41,7 +41,7 @@ A modern, interactive SQL learning and practice environment built with React, Ty
 - **Challenges**
   - Real-world SQL problems
   - Difficulty levels (Beginner to Advanced)
-  - Solution validation
+  - Solution validation with incorrect attempts tracking 
   - Performance metrics
 
 ### User Experience
